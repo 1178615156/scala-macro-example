@@ -25,3 +25,38 @@ using macro impl hello world
   }
 ```
 
+####max
+it is so ease 
+```scala
+object MaxMacros {
+  def apply(l: Int, r: Int): Int = macro impl
+
+  def impl(c: Context)(l: c.Expr[Int], r: c.Expr[Int]) = {
+    import c.universe._
+    c.Expr( q"""
+    val temp_l=$l
+    val temp_r=$r
+    if (temp_l>temp_r)
+      temp_l
+    else
+      temp_r
+
+    """)
+  }
+}
+```
+
+####get class 
+only a classOf
+```scala
+object GetClassMacros {
+  def apply[T]: Class[T] = macro impl[T]
+
+  def impl[T: c.WeakTypeTag](c: Context) = {
+    import c.universe._
+    c.Expr( q"""
+      classOf[${c.weakTypeOf[T]}]
+    """)
+  }
+}
+```
