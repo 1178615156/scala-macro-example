@@ -78,10 +78,14 @@ use like
 ####make-no-args-constructor
 use like follow 
 ```scala
+  @MakeGetSet
   @MakeNoArgsConstructorMacros
-  case class Module(i: Int, s: String)
+  //Entity
+  case class Module(//@id
+                    i: Int, 
+                    s: String)
 
   val m = new Module()
-  println(m.i)//0
-  println(m.s)//null
+  println(m.getI) //0
+  println(m.getS) //null
 ```

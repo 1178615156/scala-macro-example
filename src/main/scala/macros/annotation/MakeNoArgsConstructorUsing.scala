@@ -5,10 +5,11 @@ package macros.annotation
  */
 object MakeNoArgsConstructorUsing extends App {
 
+  @MakeGetSet
   @MakeNoArgsConstructorMacros
   case class Module(i: Int, s: String)
 
   val m = new Module()
-  println(m.i)//0
-  println(m.s)//null
+  println(m.getI) //0
+  println(m.getS) //null
 }
