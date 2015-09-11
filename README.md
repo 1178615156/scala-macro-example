@@ -60,3 +60,16 @@ object GetClassMacros {
   }
 }
 ```
+#### get public val 
+collect public val to list and map 
+like follow
+```scala
+  object Module_1 {
+    val a = 1
+    val b = 2
+    val c = 3
+    //need write return type
+    val list: List[Int] = GetPublicValMacros.listValue[Module_1.type, Int]//List(1,2,3)
+    val map: Map[String, Int] = GetPublicValMacros.mapValue[Module_1.type, Int]//Map(c -> 3, b -> 2, a -> 1)
+  }
+```
