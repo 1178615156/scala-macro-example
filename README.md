@@ -65,9 +65,13 @@ impl is so easy
 ## use work sheet
 node:only idea have work sheet ;
      scala ide maybe has same feature
+
 when you test macro feature then the work sheet is very useful so let us see it :
+
 code in module/src/main/scala/ws
+
 first new a ScalaWorkSheet
+
 when you use macro then you need add follow 
 ```scala
 import scala.language.experimental.macros
@@ -85,6 +89,7 @@ q"trait A"
 ```
 #### DefDef explanation
 show DefDef frequently used function
+
 code see to ws/DefDef_explanation
 
 #### get public val 
