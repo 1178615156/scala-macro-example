@@ -1,4 +1,6 @@
 # scala-macro-example
+src/main is use
+module/macros is macro impl
 ## node
 ###### 1
 before you use macro must compile complete
