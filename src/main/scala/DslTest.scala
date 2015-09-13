@@ -3,9 +3,9 @@
  */
 object DslTest extends App {
 
-  sealed class ConnectionWord
+  sealed class ConnectionWord(val word: String)
 
-  case class ConnectionWordAnd() extends ConnectionWord
+  case class ConnectionWordAnd() extends ConnectionWord("and")
 
   case class Human(name: String, private val s: String = "") {
 
@@ -17,7 +17,8 @@ object DslTest extends App {
 
     def say = s"${this.name} $s"
 
-    def and(connectionWord: ConnectionWordAnd = new ConnectionWordAnd) = this.copy(s = this.s + "and ")
+    def and(connectionWord: ConnectionWordAnd = new ConnectionWordAnd) =
+      this.copy(s = s"${this.s} ${connectionWord.word} ")
   }
 
   val & : ConnectionWordAnd = new ConnectionWordAnd
