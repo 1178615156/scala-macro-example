@@ -5,7 +5,7 @@ import scala.reflect.macros.blackbox.Context
 /**
  * Created by YuJieShui on 2015/9/11.
  */
-trait ClassWithFunc {
+trait ClassWithFuncBase {
   val c: Context
 
   import c.universe._

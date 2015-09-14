@@ -2,7 +2,7 @@ package macros.annotation
 
 import java.io.{File, PrintWriter}
 
-import macros.annotation.base.{ClassWithFunc, GetInClass}
+import macros.annotation.base.{ClassWithFuncBase, GetInClassBase}
 
 import scala.annotation.StaticAnnotation
 import scala.language.experimental.macros
@@ -16,8 +16,8 @@ class FullNameMacro extends StaticAnnotation {
 }
 
 class FullNameMacroImpl(val c: Context)
-  extends GetInClass
-  with ClassWithFunc {
+  extends GetInClassBase
+  with ClassWithFuncBase {
 
   import c.universe._
 
