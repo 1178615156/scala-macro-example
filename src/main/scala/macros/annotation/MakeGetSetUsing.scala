@@ -5,7 +5,7 @@ package macros.annotation
  */
 object MakeGetSetUsing extends App {
 
-  @MakeGetSet
+  @MakeGetSetMacro
   case class Module(
                      i: Int = 2,
                      s: String,
