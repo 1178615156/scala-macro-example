@@ -70,15 +70,12 @@ class GetPublicValMacrosImpl(val c: Context) {
          * then Equivalent to
          *
          * if no reverse then
-         * val list=List(list,c,b,a)
+         * val list=List(c,b,a) -- run stack is put a,b,c --pop c,b,a
          *
          * if has then
-         * val list=List(a,b,c,list)
-
-         * why need filter(_!=null)
-         * closer look on top
+         * val list=List(a,b,c)
          */
-      }).asInstanceOf[List[$rt]]
+      }).asInstanceOf[List[$rt]].filter(_!=null)
     """
     )
   }
@@ -92,7 +89,7 @@ class GetPublicValMacrosImpl(val c: Context) {
         .filter(_.info.resultType.<:<(rt))
         .filter(_.isGetter)
         .map(e => e.name.toString -> e.name)
-    }).asInstanceOf[Map[String,$rt]]
+    }).asInstanceOf[Map[String,$rt]].filter(_._2!=null)
     """)
   }
 }
