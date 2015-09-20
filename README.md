@@ -2,6 +2,19 @@
 src/main is use
 
 module/macros is macro impl
+```
+node                use macro need node
+hello               hello world 
+max                 get max number 
+get class           use macro type param 
+work shell          test feature is very useful
+defdef              look DefDef have what property
+show info           when you debug or test feature also is useful 
+get public val      collect public val to list and map 
+make get set        using macro annotation make get set method 
+make constructor    using macro annotation make no args constructor
+
+```
 ## node
 ###### 1
 before you use macro must compile complete
@@ -87,7 +100,11 @@ q"class A"
 q"object A"
 q"trait A"
 ```
-## show info 
+#### DefDef explanation
+ show DefDef frequently used function
+ code see to ws/DefDef_explanation
+
+#### show info 
  when you use idea 
  open bottom terminal 
  enter 
@@ -113,9 +130,6 @@ try remove annotation prefix //, keydown ctrl+s
  you well look compile info 
  
  
-#### DefDef explanation
- show DefDef frequently used function
- code see to ws/DefDef_explanation
 
 #### get public val 
 collect public val to list and map 
