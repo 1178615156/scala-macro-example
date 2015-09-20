@@ -35,7 +35,7 @@ object ShowInfoImpl {
     def apply(annottees: c.Expr[Any]*): c.Expr[Any] = {
       val a: Seq[c.universe.Tree] = annottees.map(_.tree)
       val inclass = getInClass(a.toList)
-      showRawInfo(inclass)
+      showInfo(showRaw(inclass))
       c.Expr[Any](Block(a.toList, Literal(Constant(()))))
     }
   }
@@ -47,7 +47,7 @@ object ShowInfoImpl {
     def apply(annottees: c.Expr[Any]*): c.Expr[Any] = {
       val a: Seq[c.universe.Tree] = annottees.map(_.tree)
       val inclass = getInClass(a.toList)
-      showInfo(inclass)
+      showInfo(show(inclass))
       c.Expr[Any](Block(a.toList, Literal(Constant(()))))
     }
   }
@@ -59,12 +59,17 @@ object ShowInfoImpl {
     def apply(annottees: c.Expr[Any]*): c.Expr[Any] = {
       val a: Seq[c.universe.Tree] = annottees.map(_.tree)
       val inclass = getInClass(a.toList)
-      showCodeInfo(inclass)
+      showInfo(showCode(inclass))
       c.Expr[Any](Block(a.toList, Literal(Constant(()))))
     }
   }
 
 }
+
+
+
+
+
 //
 //class ShowInfoMacros extends StaticAnnotation {
 //  def macroTransform(annottees: Any*): Any = macro ShowInfoImpl.apply

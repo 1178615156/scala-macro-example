@@ -87,10 +87,35 @@ q"class A"
 q"object A"
 q"trait A"
 ```
-#### DefDef explanation
-show DefDef frequently used function
+## show info 
+ when you use idea 
+ open bottom terminal 
+ enter 
+ ```scala
+//when you change or write code sbt will compile your project 
+ sbt ~compile  //compile project no include test 
+ sbt ~test     //compile project include test
+ ```
 
-code see to ws/DefDef_explanation
+```scala
+  trait SuperTrait
+  class SuperClass
+  @ShowInfo.Show
+  //@ShowInfo.showCode
+  //@ShowInfo.ShowRaw
+  class ShowInfoUsing(val i: Int = 1) extends SuperClass with SuperTrait {
+    def f = 1
+
+    val a = 1
+  }
+```
+try remove annotation prefix //, keydown ctrl+s 
+ you well look compile info 
+ 
+ 
+#### DefDef explanation
+ show DefDef frequently used function
+ code see to ws/DefDef_explanation
 
 #### get public val 
 collect public val to list and map 
@@ -136,4 +161,12 @@ use like follow
   val m = new Module()
   println(m.getI) //0
   println(m.getS) //null
+```
+##full name 
+ get package + class name 
+```scala
+@FullNameMacro
+class FullNameUsingEntity
+  val fn=new FullNameUsingEntity().fullName
+  assert(fn=="macros.annotation.FullNameUsingEntity")
 ```
