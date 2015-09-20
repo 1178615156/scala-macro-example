@@ -36,4 +36,19 @@ object DslTest extends App {
   i meet you and() like you and & like you
   i.meet(you).and().like(you).and(&).like(you)
 
+
+  var aa = 1
+  var bb = 2
+
+  def ff[T](f: => T) = {
+    () => f
+  }
+
+  val l = List(()=>(aa), ()=>(bb))
+  aa += 1
+  println(aa)
+  println(l.map(_.apply()))
+  aa += 1
+  println(l.map(_.apply()))
+
 }
