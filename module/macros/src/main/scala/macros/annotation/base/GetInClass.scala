@@ -11,7 +11,7 @@ trait GetInClass {
   import c.universe._
 
   //get case class
-  def getInClass(list_annottees: List[Tree]) = list_annottees match {
-    case inClass :: Nil => inClass
-  }
+  def getInClass(list_annottees: List[Tree]) = list_annottees.collect {
+    case cc: ClassDef => cc
+  }.head
 }
