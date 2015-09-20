@@ -17,8 +17,8 @@ class MakeNoArgsConstructorMacrosImpl(val c: Context)
 //only has a getInClass
 //we already write it in MakeGetSetImpl
 //so no copy yet reuse it
-  extends base.GetInClass
-  with base.ClassWithFunc {
+  extends base.GetInClassBase
+  with base.ClassWithFuncBase {
 
   import c.universe._
 

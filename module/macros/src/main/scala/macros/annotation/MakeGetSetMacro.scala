@@ -8,11 +8,11 @@ import scala.language.experimental.macros
  * Created by YuJieShui on 2015/9/11.
  */
 @compileTimeOnly("")
-class MakeGetSet extends StaticAnnotation {
-  def macroTransform(annottees: Any*): Any = macro MakeGetSetImpl.impl
+class MakeGetSetMacro extends StaticAnnotation {
+  def macroTransform(annottees: Any*): Any = macro MakeGetSetMacroImpl.impl
 }
 
-class MakeGetSetImpl(val c: Context) {
+class MakeGetSetMacroImpl(val c: Context) {
 
   import c.universe._
 

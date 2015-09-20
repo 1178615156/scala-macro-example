@@ -43,23 +43,21 @@ class GetPublicValMacrosImpl(val c: Context) {
     val typ: c.Type = c.weakTypeOf[ClassType]
     val rt = c.weakTypeOf[ReturnType]
     c.Expr[List[ReturnType]](
+    // quasiquotes instructions :
+    // http://docs.scala-lang.org/overviews/quasiquotes/intro.html
       q"""
     List(..${
         getPublicVal(typ)
           // filter return type is ReturnType
           .filter(_.info.resultType.<:<(rt))
-          //if is a val then
-          //the value has getter method
-          //but if is private[this] val
-          //will be not
+          //if is a val then the value has getter method
+          //but if is private[this] val will be not
           .filter(_.isGetter)
           .map(_.name)
           .toList.reverse
         //why need reverse
         //you guess
         /**
-         * for the following reasons
-         *
          * object TT{
          * val a=1
          * val b=2

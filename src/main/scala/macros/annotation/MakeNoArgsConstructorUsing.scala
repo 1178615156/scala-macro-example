@@ -5,7 +5,7 @@ package macros.annotation
  */
 object MakeNoArgsConstructorUsing extends App {
 
-  @MakeGetSet
+  @MakeGetSetMacro
   @MakeNoArgsConstructorMacros
   case class Module(i: Int, s: String)
 
