@@ -7,7 +7,7 @@ import scala.reflect.macros.blackbox.Context
  * Created by yu jie shui on 2015/9/14 15:14.
  */
 
-trait FullNameBase {
+trait FullName {
    val c: Context
 
    import c.universe._
