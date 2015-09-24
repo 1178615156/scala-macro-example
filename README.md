@@ -3,17 +3,18 @@ src/main is use
 
 module/macros is macro impl
 ```
-node                use macro need node
-hello               hello world 
-max                 get max number 
-get class           use macro type param 
-work shell          test feature is very useful
-defdef              look DefDef have what property
-show info           when you debug or test feature also is useful 
-get public val      collect public val to list and map 
-make get set        using macro annotation make get set method 
-make constructor    using macro annotation make no args constructor
-
+node                    use macro need node
+hello                   hello world 
+max                     get max number 
+get class               use macro type param 
+work shell              test feature is very useful
+defdef                  look DefDef have what property
+show info               when you debug or test feature also is useful 
+get annotation param    get annotation param
+get public val          collect public val to list and map 
+make get set            using macro annotation make get set method 
+make constructor        using macro annotation make no args constructor
+    
 ```
 ## node
 ###### 1
@@ -105,6 +106,7 @@ q"trait A"
  code see to ws/DefDef_explanation
 
 #### show info 
+####get annotation param
  when you use idea 
  open bottom terminal 
  enter 
@@ -119,7 +121,7 @@ q"trait A"
   class SuperClass
   @ShowInfo.Show
   //@ShowInfo.showCode
-  //@ShowInfo.ShowRaw
+  //@ShowInfo.ShowRaw(showInfo=false)
   class ShowInfoUsing(val i: Int = 1) extends SuperClass with SuperTrait {
     def f = 1
 
@@ -128,7 +130,7 @@ q"trait A"
 ```
 try remove annotation prefix //, keydown ctrl+s 
  you well look compile info 
- 
+ and try change (showInfo=false) to (showInfo=true)
  
 
 #### get public val 
@@ -184,3 +186,4 @@ class FullNameUsingEntity
   val fn=new FullNameUsingEntity().fullName
   assert(fn=="macros.annotation.FullNameUsingEntity")
 ```
+
