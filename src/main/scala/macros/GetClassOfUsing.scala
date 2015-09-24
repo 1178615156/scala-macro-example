@@ -1,5 +1,7 @@
 package macros
 
+import macross.GetClassMacros
+
 import scala.reflect.ClassTag
 
 /**

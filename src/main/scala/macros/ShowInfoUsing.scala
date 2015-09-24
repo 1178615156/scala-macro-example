@@ -1,6 +1,6 @@
 package macros
 
-import macros.annotation.ShowInfo
+import macross.annotation.ShowInfo
 
 
 /**
@@ -12,7 +12,7 @@ object ShowInfoUsing {
 
   class SuperClass
 
-  @ShowInfo.Show
+//  @ShowInfo.Show
   //@ShowInfo.showCode
   //@ShowInfo.ShowRaw
   class ShowInfoUsing(val i: Int = 1) extends SuperClass with SuperTrait {

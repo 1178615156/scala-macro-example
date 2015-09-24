@@ -1,5 +1,7 @@
 package macros
 
+import macross.HelloMacros
+
 /**
  * Created by YuJieShui on 2015/9/10.
  */

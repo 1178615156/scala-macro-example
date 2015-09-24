@@ -1,5 +1,7 @@
 package macros.annotation
 
+import macross.annotation.{MakeGetSetMacro, MakeNoArgsConstructorMacros}
+
 /**
  * Created by YuJieShui on 2015/9/11.
  */
