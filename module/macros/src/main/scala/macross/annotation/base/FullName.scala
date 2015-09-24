@@ -1,4 +1,4 @@
-package macros.annotation.base
+package macross.annotation.base
 
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context

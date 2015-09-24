@@ -1,6 +1,6 @@
-package macros.annotation
+package macross.annotation
 
-import macros.annotation.base.GetInClass
+import macross.annotation.base.GetInClass
 
 import scala.annotation.StaticAnnotation
 import scala.reflect.macros.blackbox.Context

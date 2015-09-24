@@ -1,4 +1,4 @@
-package macros.annotation
+package macross.annotation
 
 import scala.annotation.{StaticAnnotation, compileTimeOnly}
 import scala.reflect.macros.blackbox.Context
