@@ -1,4 +1,4 @@
-package macros.annotation
+package macross.annotation
 
 /**
  * Created by yu jie shui on 2015/9/14 15:42.

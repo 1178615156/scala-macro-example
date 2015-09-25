@@ -1,6 +1,6 @@
-package macros
+package macross
 
-import macros.annotation.ShowInfo
+import macross.annotation.ShowInfo
 
 
 /**

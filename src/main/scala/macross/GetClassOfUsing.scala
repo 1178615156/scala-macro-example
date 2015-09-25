@@ -1,4 +1,4 @@
-package macros
+package macross
 
 import scala.reflect.ClassTag
 
