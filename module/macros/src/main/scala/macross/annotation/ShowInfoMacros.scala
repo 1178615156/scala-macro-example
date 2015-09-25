@@ -1,6 +1,6 @@
 package macross.annotation
 
-import macross.annotation.base.GetInClass
+import macross.base.{GetInClass, ShowInfo}
 
 import scala.annotation.StaticAnnotation
 import scala.reflect.macros.blackbox.Context
@@ -30,7 +30,7 @@ object ShowInfo {
 object ShowInfoImpl {
 
 
-  class ShowImpl(val c: Context) extends base.ShowInfo with GetInClass {
+  class ShowImpl(val c: Context) extends ShowInfo with GetInClass {
 
     import c.universe._
 
@@ -42,7 +42,7 @@ object ShowInfoImpl {
     }
   }
 
-  class ShowCodeImpl(val c: Context) extends base.ShowInfo with GetInClass {
+  class ShowCodeImpl(val c: Context) extends ShowInfo with GetInClass {
 
     import c.universe._
 
@@ -54,7 +54,7 @@ object ShowInfoImpl {
     }
   }
 
-  class ShowRawImpl(val c: Context) extends base.ShowInfo with GetInClass with base.AnnotationParam {
+  class ShowRawImpl(val c: Context) extends ShowInfo with GetInClass with base.AnnotationParam {
 
     import c.universe._
 

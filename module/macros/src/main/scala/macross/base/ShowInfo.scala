@@ -1,4 +1,4 @@
-package macross.annotation.base
+package macross.base
 
 import scala.reflect.macros.blackbox.Context
 
@@ -7,8 +7,6 @@ import scala.reflect.macros.blackbox.Context
  */
 trait ShowInfo {
   val c: Context
-
-  import c.universe._
 
 
   def showInfo(s: String) =

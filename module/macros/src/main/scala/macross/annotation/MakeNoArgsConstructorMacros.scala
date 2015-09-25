@@ -1,5 +1,7 @@
 package macross.annotation
 
+import macross.base.GetInClass
+
 import scala.annotation.{StaticAnnotation, compileTimeOnly}
 import scala.reflect.macros.blackbox.Context
 import scala.language.experimental.macros
@@ -17,7 +19,7 @@ class MakeNoArgsConstructorMacrosImpl(val c: Context)
 //only has a getInClass
 //we already write it in MakeGetSetImpl
 //so no copy yet reuse it
-  extends base.GetInClass
+  extends GetInClass
   with base.ClassWithFunc {
 
   import c.universe._

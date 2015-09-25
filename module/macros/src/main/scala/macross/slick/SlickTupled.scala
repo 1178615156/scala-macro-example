@@ -1,7 +1,9 @@
 package macross.slick
 
-import macross.annotation.base.{AnnotationParam, ClassWithFunc, ShowInfo, GetInClass}
+import macross.annotation.base.{AnnotationParam, ClassWithFunc}
+import macross.base.{IsBaseType, GetInClass, ShowInfo}
 
+import scala.concurrent.Future
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.macros.blackbox.Context
 import scala.language.experimental.macros
@@ -20,6 +22,7 @@ class SlickTupledImpl(val c: Context)
   extends GetInClass
   with ShowInfo
   with ClassWithFunc
+  with IsBaseType
   with AnnotationParam {
 
   import c.universe._
@@ -49,8 +52,19 @@ class SlickTupledImpl(val c: Context)
       if (hasSlickApply) q"" else q"def slickApply=apply _ "
     //    if (sis) showInfo(hasSlickApply.toString())
 
+    def vOrOption[A <: Tree, B >: Tree](tree: Tree): PartialFunction[A, B] = {
+      case e@tq"$tree" => e
+      case e@tq"Option[$tree]" => e
+    }
     val paramsType = params.map(_.tpt)
+    val a = paramsType.collect(
+      collectBaseType orElse
+        collectOptionBaseType orElse {
+        vOrOption(tq"Future[_]").andThen(e => tq"String")
+      }
+    )
 
+    showInfo(show(a))
     //with slickTupled func
     val slickTupled = q"""
         def slickTupled(ttt:(..${paramsType}))=slickApply(
