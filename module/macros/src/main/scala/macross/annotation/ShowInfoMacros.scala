@@ -12,9 +12,7 @@ import scala.annotation.{compileTimeOnly, StaticAnnotation}
  */
 object ShowInfo {
 
-  class ShowRaw extends StaticAnnotation {
-    def macroTransform(annottees: Any*): Any = macro ShowInfoImpl.ShowRawImpl.apply
-  }
+
 
   class Show extends StaticAnnotation {
     def macroTransform(annottees: Any*): Any = macro ShowInfoImpl.ShowImpl.apply
@@ -24,21 +22,13 @@ object ShowInfo {
     def macroTransform(annottees: Any*): Any = macro ShowInfoImpl.ShowCodeImpl.apply
   }
 
+  class ShowRaw(val showInfo: Boolean) extends StaticAnnotation {
+    def macroTransform(annottees: Any*): Any = macro ShowInfoImpl.ShowRawImpl.apply
+  }
 }
 
 object ShowInfoImpl {
 
-  class ShowRawImpl(val c: Context) extends base.ShowInfo with GetInClass {
-
-    import c.universe._
-
-    def apply(annottees: c.Expr[Any]*): c.Expr[Any] = {
-      val a: Seq[c.universe.Tree] = annottees.map(_.tree)
-      val inclass = getInClass(a.toList)
-      showInfo(showRaw(inclass))
-      c.Expr[Any](Block(a.toList, Literal(Constant(()))))
-    }
-  }
 
   class ShowImpl(val c: Context) extends base.ShowInfo with GetInClass {
 
@@ -64,10 +54,24 @@ object ShowInfoImpl {
     }
   }
 
+  class ShowRawImpl(val c: Context) extends base.ShowInfo with GetInClass with base.AnnotationParam {
+
+    import c.universe._
+
+    def apply(annottees: c.Expr[Any]*): c.Expr[Any] = {
+      val a: Seq[c.universe.Tree] = annottees.map(_.tree)
+      val inclass = getInClass(a.toList)
+
+      //get annotation param showInfo and check
+      //if is true then show info in the compile
+      if (annotationParam(TermName("showInfo")).equalsStructure(q"true"))
+        showInfo(showRaw(inclass))
+
+      c.Expr[Any](Block(a.toList, Literal(Constant(()))))
+    }
+  }
+
 }
-
-
-
 
 
 //

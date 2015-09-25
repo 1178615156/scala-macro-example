@@ -11,7 +11,11 @@ trait GetInClass {
   import c.universe._
 
   //get case class
-  def getInClass(list_annottees: List[Tree]) = list_annottees.collect {
+  def getInClass(list_annottees: Seq [Tree]) = list_annottees.collect {
     case cc: ClassDef => cc
+  }.head
+
+  def getInModule(list_annottees: Seq[Tree]) = list_annottees.collect {
+    case cc: ModuleDef => cc
   }.head
 }

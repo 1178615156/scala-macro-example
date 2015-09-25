@@ -8,13 +8,14 @@ import macross.annotation.ShowInfo
  */
 
 object ShowInfoUsing {
+
   trait SuperTrait
 
   class SuperClass
 
-  @ShowInfo.Show
+  //  @ShowInfo.Show
   //@ShowInfo.showCode
-  //@ShowInfo.ShowRaw
+  @ShowInfo.ShowRaw(showInfo = false)
   class ShowInfoUsing(val i: Int = 1) extends SuperClass with SuperTrait {
     def f = 1
 

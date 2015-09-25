@@ -1,5 +1,7 @@
 package macross.annotation
 
+import macross.annotation.MakeGetSetMacro
+
 /**
  * Created by YuJieShui on 2015/9/11.
  */

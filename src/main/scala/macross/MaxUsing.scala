@@ -1,5 +1,7 @@
 package macross
 
+import macross.MaxMacros
+
 /**
  * Created by YuJieShui on 2015/9/10.
  */

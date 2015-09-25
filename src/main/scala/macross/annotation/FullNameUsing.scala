@@ -1,5 +1,7 @@
 package macross.annotation
 
+import macross.annotation.FullNameMacro
+
 /**
  * Created by yu jie shui on 2015/9/14 15:42.
  */
@@ -10,3 +12,4 @@ object FullNameUsing extends App{
   assert(fn=="macros.annotation.FullNameUsingEntity")
   println(fn)
 }
+
