@@ -17,20 +17,24 @@ trait IsBaseType {
     case e@tq"String" => true
     case _ => false
   }
-class L[-A]{
-  def a(a: A)=1
-}
-//  val s: L[Option[Int]] = new L[Option[Int]]
-  val l: L[Some[Int]] =  new L[Option[Int]]
-  l.a(Some(1))
-//  l.a(Option(1))
-  def collectBaseType[A<:Tree, B>:Tree]: PartialFunction[A, B] =  {
+
+  def isOptionBaseType(t: Tree) = t match {
+    case e@tq"Option[Int]" => true
+    case e@tq"Option[Boolean]" => true
+    case e@tq"Option[Long]" => true
+    case e@tq"Option[String]" => true
+    case _ => false
+
+  }
+
+  def collectBaseType[A <: Tree, B >: Tree]: PartialFunction[A, B] = {
     case e@tq"Int" => e
     case e@tq"Boolean" => e
     case e@tq"Long" => e
     case e@tq"String" => e
   }
-  def collectOptionBaseType[A<:Tree, B>:Tree]: PartialFunction[A, B]={
+
+  def collectOptionBaseType[A <: Tree, B >: Tree]: PartialFunction[A, B] = {
     case e@tq"Option[Int]" => e
     case e@tq"Option[Boolean]" => e
     case e@tq"Option[Long]" => e
