@@ -8,11 +8,12 @@ import scala.reflect.macros.blackbox.Context
  */
 
 trait FullName {
-   val c: Context
+  val c: Context
 
-   import c.universe._
+  import c.universe._
 
-  def fullName(inClass:ClassDef)= c.typecheck(inClass).symbol.fullName
+  def fullName(inClass: ClassDef) = c.typecheck(inClass).symbol.fullName
 
+  def fullName(inClass: ModuleDef) = c.typecheck(inClass).symbol.fullName
 
 }
