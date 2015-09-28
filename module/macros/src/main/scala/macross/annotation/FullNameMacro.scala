@@ -2,7 +2,8 @@ package macross.annotation
 
 import java.io.{File, PrintWriter}
 
-import macross.annotation.base.{ClassWithFunc, GetInClass}
+import macross.annotation.base.ClassWithFunc
+import macross.base.GetInClass
 
 import scala.annotation.StaticAnnotation
 import scala.language.experimental.macros
