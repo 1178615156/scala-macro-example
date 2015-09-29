@@ -22,26 +22,17 @@ class SlickTupledAndUnapplyImpl(val c: Context)
   extends GetInClass
   with ShowInfo
   with ClassWithFunc
-  with IsBaseType
   with AnnotationParam
-  with SlickTypeMacro.Replace {
+  with IsBaseType
+  with SlickTypeMacro.Replace
+  with SlickTypeMacro.Retention {
 
   import c.universe._
 
-
-  def apply(annottees: c.Expr[Any]*): c.Expr[Any] = {
-    //get annotation param showInfo and check
-    //if is true then show info in the compile
-    val showInfoSwitch = annotationParam(TermName("showInfo")).equalsStructure(q"true")
-
-    val classDef = getInClass(annottees.map(_.tree))
-    val moduleDef = getInModule(annottees.map(_.tree))
-
-    //get params
+  def makeSlickTupled(classDef: c.universe.ClassDef, moduleDef: c.universe.ModuleDef) = {
     val params: List[ValDef] = classDef match {
       case q"$med class $name (..$params) extends ..$base {..$body}" => params
     }
-
     //if has slickApply then use
     //else make a slickApply
     val hasSlickApply = moduleDef.impl.body.collect {
@@ -51,75 +42,67 @@ class SlickTupledAndUnapplyImpl(val c: Context)
 
     val slickApply =
       if (hasSlickApply) q"" else q"def slickApply=apply _ "
-    //    if (sis) showInfo(hasSlickApply.toString())
-
-    def vOrOption[A <: Tree, B >: Tree](tree: Tree): PartialFunction[A, B] = {
-      case e@tq"$tree" => e
-      case e@tq"Option[$tree]" => e
-    }
     val paramsType = params.map(_.tpt)
-
-    //    showInfo(show(paramsType.filter(isReplace)))
-    val nameWithParamType = params.map(e => e.name -> e.tpt).collect {
-      PartialFunction(ee => {
-        ee._2 match {
-          case tq"Int" => ee
-          case tq"Boolean" => ee
-          case tq"Long" => ee
-          case tq"String" => ee
-
-          case tq"Option[Int]" => ee
-          case tq"Option[Boolean]" => ee
-          case tq"Option[Long]" => ee
-          case tq"Option[String]" => ee
-
-          case tq"Future[String]" => ee
-          case tq"Option[Future[String]]"=>ee
-        }
-      })
-    }
-    val filterParamTypes = paramsType.collect(
-      collectBaseType orElse
-        collectOptionBaseType orElse {
-        vOrOption(tq"Future[_]")
-      }
-    )
-    val filterParamTypeReplaces =
-      paramsType.collect(
-        collectBaseType orElse
-          collectOptionBaseType orElse {
-          vOrOption(tq"Future[_]").andThen(e => tq"String")
-        }
-      )
-
-
-    showInfo(show(filterParamTypeReplaces))
+    //    showInfo(show(filterParamTypeReplaces))
     //with slickTupled func
+    val retentionType = paramsType.filter(isSlickRetentionType).map(e => if (isSlickReplaceType(e)) replaceMap.get(e).get else e)
     val slickTupled = q"""
-        def slickTupled(ttt:(..${filterParamTypeReplaces}))={
+        def slickTupled(ttt:(..${retentionType}))={
         slickApply(
         ..${
-      (1 to filterParamTypeReplaces.size)
+      (1 to retentionType.size)
         .map(e => TermName(s"_$e"))
-        .zip(filterParamTypes).map(e => q"ttt.${e._1}:${e._2}")
+        .map(e => q"ttt.${e}")
     }
         )
         }
         """
+    List(slickApply, slickTupled)
+  }
+
+  def makeSlickUnapply(classDef: c.universe.ClassDef, moduleDef: c.universe.ModuleDef) = {
+    //get params
+    val params: List[ValDef] = classDef match {
+      case q"$med class $name (..$params) extends ..$base {..$body}" => params
+    }
+    val nameWithParamType = params.map(e => e.name -> e.tpt).filter(e => {
+      isSlickRetentionType(e._2)
+    })
+
     val slickUnapply = q"""
     def slickUnapply(a:${tq"${classDef.name}"})=Option(
-    ..${nameWithParamType.map(_._1).map(e=>q"SlickType tran a.$e")}
+    ..${nameWithParamType.map(_._1).map(e => q"SlickType tran a.$e")}
     )
-
     """
-    //        if (showInfoSwitch)
-    showInfo(show(slickTupled))
-    showInfo(show(slickUnapply))
+    List(slickUnapply)
+  }
+
+  def apply(annottees: c.Expr[Any]*): c.Expr[Any] = {
+    //get annotation param showInfo and check
+    //if is true then show info in the compile
+    val showInfoSwitch = annotationParam(TermName("showInfo")).equalsStructure(q"true")
+
+    val classDef: c.universe.ClassDef = getInClass(annottees.map(_.tree))
+    val moduleDef: c.universe.ModuleDef = getInModule(annottees.map(_.tree))
+
+//    //get params
+//    val params: List[ValDef] = classDef match {
+//      case q"$med class $name (..$params) extends ..$base {..$body}" => params
+//    }
+//    val paramsType = params.map(_.tpt)
+//    showInfo(show(paramsType.filter(isSlickRetentionType)))
+
+    val slickTupled = makeSlickTupled(classDef, moduleDef)
+    val slickUnapply = makeSlickUnapply(classDef, moduleDef)
+    if (showInfoSwitch) {
+      showInfo(show(slickTupled))
+      showInfo(show(slickUnapply))
+    }
 
 
     c.Expr[Any](Block(List(
       classDef,
-      classWithFunc(moduleDef, List(slickApply, slickTupled,slickUnapply))),
+      classWithFunc(moduleDef, slickTupled ++ slickUnapply)),
       Literal(Constant(()))))
 
   }

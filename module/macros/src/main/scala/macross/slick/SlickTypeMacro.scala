@@ -9,18 +9,27 @@ import scala.reflect.macros.blackbox.Context
  */
 object SlickTypeMacro {
 
-  //  trait Retention {
-  //    self: IsBaseType =>
-  //    val c: Context
-  //
-  //    import c.universe._
-  //
-  //    def isSlickRetentionType(params: List[ValDef]) = {
-  //      params.filter(e => {
-  //        isBaseType(e.tpt)
-  //      })
-  //    }
-  //  }
+  trait Retention {
+    self: IsBaseType with Replace =>
+    val c: Context
+
+    import c.universe._
+
+    def isSlickRetentionType(params: Tree) = {
+      isBaseType(params) || isOptionBaseType(params) || isSlickReplaceType(params)
+      //      params match {
+      //        case tq"Int" => true
+      //        case tq"Boolean" => true
+      //        case tq"Long" => true
+      //        case tq"String" => true
+      //        case tq"Option[Int]" => true
+      //        case tq"Option[Boolean]" => true
+      //        case tq"Option[Long]" => true
+      //        case tq"Option[String]" => true
+      //        case _ => false
+      //      }
+    }
+  }
 
   trait Replace {
     self: IsBaseType =>
@@ -29,22 +38,20 @@ object SlickTypeMacro {
     import c.universe._
 
     val replaceList = List(
-      tq"Future[_]" -> tq"String"
-    )
+      tq"Future[String]" -> tq"String"
 
-    def vOrOption[A <: Tree, B >: Tree](tree: Tree): PartialFunction[A, B] = {
-      case e@tq"$tree" => e
-      case e@tq"Option[$tree]" => e
+    ).flatMap(e => List(e, tq"Option[${e._1}]" -> tq"Option[${e._2}]"))
+    val replaceMap = {
+      class RM {
+        def get(t: Tree): Option[c.universe.Tree] = {
+          replaceList.find(_._1.equalsStructure(t)).map(_._2)
+        }
+      }
+      new RM()
     }
 
-    def isReplace(t: Tree) = {
-      t match {
-        case tq"Future[_]" => true
-        case _ => false
-      }
-//      replaceList.map(_._1).flatMap(e => {
-//        List(tq"$e", tq"Option[$e]")
-//      }).exists(_.equalsStructure(t))
+    def isSlickReplaceType(t: Tree) = {
+      replaceList.exists(e => e._1.equalsStructure(t))
     }
   }
 
