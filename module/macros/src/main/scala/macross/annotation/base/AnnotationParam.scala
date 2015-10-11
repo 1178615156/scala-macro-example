@@ -15,5 +15,7 @@ trait AnnotationParam {
       case q"new $annotationName (..$param).$fn(..$bn)" => param.collect {
         case q"$name=$v" => v
       }.head
-    }
+      case q"new ${annotationName} (..$param).$fn(..$bn)" => param.collect {
+        case q"$name=$v" => v
+      }.head    }
 }

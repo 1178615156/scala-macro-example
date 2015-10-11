@@ -19,6 +19,13 @@ trait ClassWithFunc {
             ..$listDef
             }
             """
+      case q"$mod trait $name extends ..$base {..$body}"=>
+        q"""
+            $mod trait $name extends ..$base {
+            ..$body
+            ..$listDef
+            }
+            """
       case q"$mod object $name extends ..$bases { ..$body }"=>
         q"""
             $mod object $name extends ..$bases {
