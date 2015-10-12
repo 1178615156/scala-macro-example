@@ -48,3 +48,39 @@ object GetPublicValUsing extends App {
 
 
 }
+
+object T extends App {
+
+  trait World extends Any {
+    self: StringWithHello =>
+    def world = "world:" + s
+  }
+
+  implicit final class StringWithHello(val s: String) extends AnyVal with World {
+    def hello = "hello:" + s
+  }
+
+  println("a".hello)
+
+  //  implicit final def stringWithHello(s: String) = new {
+  //    def hello = "hello:" + s
+  //  }
+
+  "a".hello
+
+  import scala.language.dynamics
+
+  object DY extends Dynamic {
+    def applyDynamic(s: String)(i: Int) = {
+      s match {
+        case "aa" => println("aa"); i + 1
+        case "bb" => println("bb"); i - 1
+      }
+    }
+  }
+
+  val a = DY.aa(1)
+  val b = DY.bb(1)
+  println(a)
+  println(b)
+}

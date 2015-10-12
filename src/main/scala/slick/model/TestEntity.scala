@@ -1,6 +1,6 @@
 package slick.model
 
-import macross.slick.SlickTupledAndUnapply
+import macross.slick.{SlickTU, SlickTupledAndUnapply}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -24,13 +24,29 @@ object SlickType {
   def tran(s: Future[String]): String = ""
 }
 
-@SlickTupledAndUnapply(showInfo = false)
 case class TestEntity(
                        age: Option[Int],
                        name: Int,
                        id: String,
                        future: Future[String] = Future.successful("")
                        )
-
 object TestEntity {
+  type Value = TestEntity
+
+  def slickApply = TestEntity.apply _
+}
+import TestEntity.Value
+import TestEntity.slickApply
+
+@SlickTU[TestEntity](showInfo = true)
+class TestEntitySU {
+
+}
+
+
+
+object Run extends App {
+   val a=new TestEntitySU().slickTupled(None,1,"1","sss")
+    println(a)
+  println(new TestEntitySU().slickUnapply(a))
 }

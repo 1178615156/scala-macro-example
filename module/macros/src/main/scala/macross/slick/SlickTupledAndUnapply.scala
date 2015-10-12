@@ -13,9 +13,12 @@ import scala.annotation.{compileTimeOnly, StaticAnnotation}
 /**
  * Created by YuJieShui on 2015/9/24.
  */
-class SlickTupledAndUnapply(val showInfo: Boolean) extends StaticAnnotation {
+class SlickTupledAndUnapply[Value](val showInfo: Boolean) extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro SlickTupledAndUnapplyImpl.apply
 }
+
+
+
 
 
 class SlickTupledAndUnapplyImpl(val c: Context)
@@ -81,16 +84,31 @@ class SlickTupledAndUnapplyImpl(val c: Context)
     //get annotation param showInfo and check
     //if is true then show info in the compile
     val showInfoSwitch = annotationParam(TermName("showInfo")).equalsStructure(q"true")
+//    showInfo(showRaw(c.macroApplication match {
+//      case q"new $name (..$param).$fn(..$bn)" =>
+//        val n: AppliedTypeTree = name.asInstanceOf[AppliedTypeTree]
+//        c.typecheck(q"${n.args.head.toString(): TermName}").tpe
+//          .members.filter(_.isMethod)
+//        //         .member("copy":TermName).asMethod.paramLists
+//        //       .map(_.asMethod.paramLists)
+//        c.mirror.staticClass(c.typecheck(q"${n.args.head.toString(): TermName}").symbol.fullName)
+//          .asClass.toType
+//          .member("<init>": TermName).asMethod.paramLists
+//      //         .members.filter(_.isMethod)
+//      //       c.typecheck(q"${n.args.head}")
+//
+//    }))
+
 
     val classDef: c.universe.ClassDef = getInClass(annottees.map(_.tree))
     val moduleDef: c.universe.ModuleDef = getInModule(annottees.map(_.tree))
 
-//    //get params
-//    val params: List[ValDef] = classDef match {
-//      case q"$med class $name (..$params) extends ..$base {..$body}" => params
-//    }
-//    val paramsType = params.map(_.tpt)
-//    showInfo(show(paramsType.filter(isSlickRetentionType)))
+    //    //get params
+    //    val params: List[ValDef] = classDef match {
+    //      case q"$med class $name (..$params) extends ..$base {..$body}" => params
+    //    }
+    //    val paramsType = params.map(_.tpt)
+    //    showInfo(show(paramsType.filter(isSlickRetentionType)))
 
     val slickTupled = makeSlickTupled(classDef, moduleDef)
     val slickUnapply = makeSlickUnapply(classDef, moduleDef)
