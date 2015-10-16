@@ -1,4 +1,4 @@
-package base
+package macross.base
 
 import scala.language.implicitConversions
 
