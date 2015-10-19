@@ -1,4 +1,4 @@
-package macross.slick
+package macross.teach.slick
 
 import macross.base.IsBaseType
 
@@ -33,7 +33,8 @@ object SlickTypeMacro {
 
     val replaceList = List(
       tq"Future[String]" -> tq"String",
-      tq"DateTime" -> tq"String"
+      tq"DateTime" -> tq"String",
+    tq"org.joda.time.DateTime"→tq"String"
     ).flatMap(e => List(e, tq"Option[${e._1}]" -> tq"Option[${e._2}]"))
     val replaceMap = {
       class RM {

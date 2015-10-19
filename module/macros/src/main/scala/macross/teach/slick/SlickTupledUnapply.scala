@@ -1,4 +1,4 @@
-package macross.slick
+package macross.teach.slick
 
 import scala.annotation.StaticAnnotation
 import macross.annotation.base.{AnnotationParam, ClassWithFunc}
@@ -14,7 +14,7 @@ import scala.annotation.{compileTimeOnly, StaticAnnotation}
  * Created by YuJieShui on 2015/10/11.
  */
 
-class SlickTU[Value](val showInfo: Boolean) extends StaticAnnotation {
+class SlickTupledUnapply[Value](val showInfo: Boolean) extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro SlickTUImpl.apply
 
 }
@@ -50,7 +50,7 @@ class SlickTUImpl(val c: Context)
         )
         }
         """
-    showInfo(show(slickTupled))
+//    showInfo(show(slickTupled))
     List(slickTupled)
   }
 
@@ -65,7 +65,7 @@ class SlickTUImpl(val c: Context)
     ..${nameWithParamType.map(_._1).map(e => q"SlickType tran a.${e.toTermName}")}
     )
     """
-    showInfo(show(slickUnapply))
+//    showInfo(show(slickUnapply))
     List(slickUnapply)
   }
 
@@ -87,10 +87,10 @@ class SlickTUImpl(val c: Context)
 
     val slickTupled = makeSlickTupled(paramLists.head)
     val slickUnapply = makeSlickUnapply(paramLists.head)
-//    if (showInfoSwitch) {
-//      showInfo(show(slickTupled))
-//      showInfo(show(slickUnapply))
-//    }
+    if (showInfoSwitch) {
+      showInfo(show(slickTupled))
+      showInfo(show(slickUnapply))
+    }
 
 
     c.Expr[Any](Block(List(

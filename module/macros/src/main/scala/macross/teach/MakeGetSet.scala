@@ -1,4 +1,4 @@
-package macross
+package macross.teach
 
 import scala.annotation.{StaticAnnotation, compileTimeOnly}
 import scala.language.experimental.macros

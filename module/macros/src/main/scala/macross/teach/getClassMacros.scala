@@ -1,8 +1,7 @@
-package macross
+package macross.teach
 
-import scala.reflect.macros.blackbox.Context
 import scala.language.experimental.macros
-import scala.annotation.{compileTimeOnly, StaticAnnotation}
+import scala.reflect.macros.blackbox.Context
 
 
 
