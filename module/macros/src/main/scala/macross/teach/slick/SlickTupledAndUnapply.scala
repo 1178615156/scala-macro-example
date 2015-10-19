@@ -1,4 +1,4 @@
-package macross.slick
+package macross.teach.slick
 
 import macross.annotation.base.{AnnotationParam, ClassWithFunc}
 import macross.base.{IsBaseType, GetInClass, ShowInfo}
@@ -13,6 +13,7 @@ import scala.annotation.{compileTimeOnly, StaticAnnotation}
 /**
  * Created by YuJieShui on 2015/9/24.
  */
+private [slick]
 class SlickTupledAndUnapply[Value](val showInfo: Boolean) extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro SlickTupledAndUnapplyImpl.apply
 }
