@@ -1,7 +1,5 @@
 package macross
 
-import macross.GetPublicValMacros
-
 /**
  * Created by YuJieShui on 2015/9/10.
  */

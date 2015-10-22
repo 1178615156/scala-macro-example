@@ -73,8 +73,7 @@ object ShowInfoImpl {
 
 }
 
-
-//
+  //
 //class ShowInfoMacros extends StaticAnnotation {
 //  def macroTransform(annottees: Any*): Any = macro ShowInfoImpl.apply
 //}
