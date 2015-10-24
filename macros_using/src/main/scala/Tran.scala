@@ -1,3 +1,5 @@
+import scala.concurrent.Future
+
 import macross.TranMacros
 
 import scala.language.higherKinds
@@ -20,9 +22,15 @@ object Tran extends App {
   //
   //
   //  Option(Option(1)).tto[Option]
-//    tran(Some(Some(1)))
+  //    tran(Some(Some(1)))
+
+  val a = TranMacros.typeList[Option[Future[List[Int]]]]
+  println(a)
+
   TranMacros.apply[Option[Option[Int]], Option[Option[Int]]](Option(Option(1)))
+
 }
+
 //object Sum{
 //
 //  def sum(list: List[Int]):Int=

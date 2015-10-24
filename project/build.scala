@@ -37,11 +37,13 @@ object P extends Build {
 
   lazy val macros = Project("macors", file("macros"), settings = buildSettings)
 
-  lazy val using = Project("using", file("macros_using"), settings =
-    buildSettings ++ Seq(publishArtifact := false)) dependsOn macros
 
   lazy val macros_try = Project("macros_try", file("macros_try"),
     settings = buildSettings ++ Seq(publishArtifact := false)) dependsOn macros
+
+  lazy val using = Project("using", file("macros_using"), settings =
+    buildSettings ++ Seq(publishArtifact := false)) dependsOn macros dependsOn macros_try
+
 
   lazy val `scala-macro-example` = Project("scala-macro-example", file("."), settings = buildSettings ++ Seq(
     organization := "com.yjs"
