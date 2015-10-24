@@ -1,6 +1,6 @@
-//package slick.model
+//package macross.teach.slick.model
 //
-//import macross.slick.{SlickTU, SlickTupledAndUnapply}
+//import macross.macross.teach.slick.{SlickTU, SlickTupledAndUnapply}
 //
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.concurrent.Future

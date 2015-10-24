@@ -1,6 +1,6 @@
-//package slick
+//package macross.teach.slick
 //
-//import slick.model.TestEntity
+//import macross.teach.slick.model.TestEntity
 //
 ///**
 // * Created by YuJieShui on 2015/9/23.
