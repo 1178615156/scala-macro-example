@@ -11,4 +11,5 @@ trait ShowInfo {
 
   def showInfo(s: String) =
     c.info(c.enclosingPosition, s.split("\n").mkString("\n |---macro info---\n |", "\n |", ""), true)
+
 }

@@ -12,8 +12,6 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 
 resolvers += Resolver.sonatypeRepo("releases")
 
-//scalacOptions +="-Ymacro-debug-lite"
-
 addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full)
 
 libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _)
@@ -23,11 +21,13 @@ libraryDependencies ++= (
   else Nil
   )
 
-lazy val macros= project.in(file("module/macros"))
+lazy val macros = project.in(file("module/macros"))
 
 lazy val root = (project in file(".")).dependsOn(macros)
 
+scalacOptions += "-Ymacro-debug-lite"
 
+scalacOptions += "-Xexperimental"
 //
 //lazy val hello_world_macro = proj("hello_world/macros")
 //
