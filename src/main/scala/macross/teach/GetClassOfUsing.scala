@@ -1,8 +1,4 @@
-package macross
-
-import macross.GetClassMacros
-
-import scala.reflect.ClassTag
+package macross.teach
 
 /**
  * Created by YuJieShui on 2015/9/10.

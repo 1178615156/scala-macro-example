@@ -1,6 +1,4 @@
-package macross
-
-import macross.HelloMacros
+package macross.teach
 
 /**
  * Created by YuJieShui on 2015/9/10.
