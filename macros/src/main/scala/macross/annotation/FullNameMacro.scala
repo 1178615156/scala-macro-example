@@ -23,7 +23,7 @@ class FullNameMacroImpl(val c: Context)
   import c.universe._
 
   def impl(annottees: c.Expr[Any]*): c.Expr[Any] = {
-    val inClass = getInClass(annottees.map(_.tree).toList)
+    val inClass = getInClass(annottees.map(_.tree).toList).head
     val fn = c.typecheck(inClass).symbol.fullName
     c.Expr(classWithFunc(inClass, List(q"def fullName=$fn")))
   }

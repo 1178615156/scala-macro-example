@@ -48,7 +48,7 @@ object ShowInfoImpl {
 
     def apply(annottees: c.Expr[Any]*): c.Expr[Any] = {
       val a: Seq[c.universe.Tree] = annottees.map(_.tree)
-      val inclass = getInClass(a.toList)
+      val inclass = getInClass(a.toList).head
       showInfo(showCode(inclass))
       c.Expr[Any](Block(a.toList, Literal(Constant(()))))
     }

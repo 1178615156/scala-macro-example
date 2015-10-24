@@ -83,7 +83,7 @@ class SlickTUImpl(val c: Context)
 //    showInfo(show(paramLists.head.map(e=>e.name->e.info)))
 
 
-    val classDef: c.universe.ClassDef = getInClass(annottees.map(_.tree))
+    val classDef: c.universe.ClassDef = getInClass(annottees.map(_.tree)).head
 
     val slickTupled = makeSlickTupled(paramLists.head)
     val slickUnapply = makeSlickUnapply(paramLists.head)

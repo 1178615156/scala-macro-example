@@ -25,7 +25,7 @@ class MakeNoArgsConstructorMacrosImpl(val c: Context)
   import c.universe._
 
   def impl(annottees: c.Expr[Any]*): c.Expr[Nothing] = {
-    val inClass = getInClass(annottees.map(_.tree).toList)
+    val inClass = getInClass(annottees.map(_.tree).toList).head
     val out=inClass match {
       case q"$mod class $name(..$params) extends ..$base {..$body}" =>
         val defaultCtorPos = c.enclosingPosition

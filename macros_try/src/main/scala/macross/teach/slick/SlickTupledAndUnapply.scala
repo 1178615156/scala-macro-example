@@ -13,13 +13,10 @@ import scala.annotation.{compileTimeOnly, StaticAnnotation}
 /**
  * Created by YuJieShui on 2015/9/24.
  */
-private [slick]
+private[slick]
 class SlickTupledAndUnapply[Value](val showInfo: Boolean) extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro SlickTupledAndUnapplyImpl.apply
 }
-
-
-
 
 
 class SlickTupledAndUnapplyImpl(val c: Context)
@@ -50,14 +47,15 @@ class SlickTupledAndUnapplyImpl(val c: Context)
     //    showInfo(show(filterParamTypeReplaces))
     //with slickTupled func
     val retentionType = paramsType.filter(isSlickRetentionType).map(e => if (isSlickReplaceType(e)) replaceMap.get(e).get else e)
-    val slickTupled = q"""
+    val slickTupled =
+      q"""
         def slickTupled(ttt:(..${retentionType}))={
         slickApply(
         ..${
-      (1 to retentionType.size)
-        .map(e => TermName(s"_$e"))
-        .map(e => q"ttt.${e}")
-    }
+        (1 to retentionType.size)
+          .map(e => TermName(s"_$e"))
+          .map(e => q"ttt.${e}")
+      }
         )
         }
         """
@@ -73,7 +71,8 @@ class SlickTupledAndUnapplyImpl(val c: Context)
       isSlickRetentionType(e._2)
     })
 
-    val slickUnapply = q"""
+    val slickUnapply =
+      q"""
     def slickUnapply(a:${tq"${classDef.name}"})=Option(
     ..${nameWithParamType.map(_._1).map(e => q"SlickType tran a.$e")}
     )
@@ -85,24 +84,24 @@ class SlickTupledAndUnapplyImpl(val c: Context)
     //get annotation param showInfo and check
     //if is true then show info in the compile
     val showInfoSwitch = annotationParam(TermName("showInfo")).equalsStructure(q"true")
-//    showInfo(showRaw(c.macroApplication match {
-//      case q"new $name (..$param).$fn(..$bn)" =>
-//        val n: AppliedTypeTree = name.asInstanceOf[AppliedTypeTree]
-//        c.typecheck(q"${n.args.head.toString(): TermName}").tpe
-//          .members.filter(_.isMethod)
-//        //         .member("copy":TermName).asMethod.paramLists
-//        //       .map(_.asMethod.paramLists)
-//        c.mirror.staticClass(c.typecheck(q"${n.args.head.toString(): TermName}").symbol.fullName)
-//          .asClass.toType
-//          .member("<init>": TermName).asMethod.paramLists
-//      //         .members.filter(_.isMethod)
-//      //       c.typecheck(q"${n.args.head}")
-//
-//    }))
+    //    showInfo(showRaw(c.macroApplication match {
+    //      case q"new $name (..$param).$fn(..$bn)" =>
+    //        val n: AppliedTypeTree = name.asInstanceOf[AppliedTypeTree]
+    //        c.typecheck(q"${n.args.head.toString(): TermName}").tpe
+    //          .members.filter(_.isMethod)
+    //        //         .member("copy":TermName).asMethod.paramLists
+    //        //       .map(_.asMethod.paramLists)
+    //        c.mirror.staticClass(c.typecheck(q"${n.args.head.toString(): TermName}").symbol.fullName)
+    //          .asClass.toType
+    //          .member("<init>": TermName).asMethod.paramLists
+    //      //         .members.filter(_.isMethod)
+    //      //       c.typecheck(q"${n.args.head}")
+    //
+    //    }))
 
 
-    val classDef: c.universe.ClassDef = getInClass(annottees.map(_.tree))
-    val moduleDef: c.universe.ModuleDef = getInModule(annottees.map(_.tree))
+    val classDef: c.universe.ClassDef = getInClass(annottees.map(_.tree)).head
+    val moduleDef: c.universe.ModuleDef = getInModule(annottees.map(_.tree)).head
 
     //    //get params
     //    val params: List[ValDef] = classDef match {
