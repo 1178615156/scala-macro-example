@@ -8,7 +8,7 @@ import scala.reflect.macros.blackbox.Context
  * Created by YuJieShui on 2015/10/27.
  */
 private[macross] object MakeHasTypeParamFunc {
-  def ol3[T]: Any = macro GetSealedSubClassImpl.ol3[T]
+  def ol3[T]: Any = macro MakeTpeParamFuncImpl.ol3[T]
 
 }
 
