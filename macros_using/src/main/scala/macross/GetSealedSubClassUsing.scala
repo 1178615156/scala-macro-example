@@ -19,5 +19,7 @@ sealed trait Hello[A]
 case class Ohayo[A, B](a: (A, B)) extends Hello[A]
 
 object GetSealed extends App {
-  GetSealedSubClass.ol3[Hello[_]]
+  val a = GetSealedSubClass.ol3[Hello[_]]
+  val b=a.asInstanceOf[ {def smartConstructors[A, B](a: (A, B)): Ohayo[A, B]}].smartConstructors(1, 2).a
+  println(b)
 }

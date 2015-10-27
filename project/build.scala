@@ -35,13 +35,13 @@ object P extends Build {
 
   import BuildSettings._
 
-  lazy val macros = Project("macors", file("macros"), settings = buildSettings)
+  lazy val macros = Project("macros", file("macros"), settings = buildSettings)
 
 
   lazy val macros_try = Project("macros_try", file("macros_try"),
     settings = buildSettings ++ Seq(publishArtifact := false)) dependsOn macros
 
-  lazy val using = Project("using", file("macros_using"), settings =
+  lazy val using = Project("macros_using", file("macros_using"), settings =
     buildSettings ++ Seq(publishArtifact := false)) dependsOn macros dependsOn macros_try
 
 

@@ -8,62 +8,70 @@ import scala.reflect.macros.blackbox.Context
 /**
  * Created by YuJieShui on 2015/10/16.
  */
-//class GetSealedSubClass {
-//
-//}
+
 object GetSealedSubClass {
   def ol[T]: List[T] = macro GetSealedSubClassImpl.apply[T]
-
-  def ol2[T]: Any = macro GetSealedSubClassImpl.ol2[T]
-
 
   def ol3[T]: Any = macro GetSealedSubClassImpl.ol3[T]
 }
 
-class GetSealedSubClassImpl(val c: Context) extends base.ShowInfo {
+class GetSealedSubClassImpl(val c: Context) {
 
   import c.universe._
 
   def apply[T: c.WeakTypeTag] = {
     val sub = c.weakTypeOf[T].typeSymbol.asClass.knownDirectSubclasses
-    //    showInfo(showRaw(sub))
     val rt = q"List(..${sub.map(e ⇒ q"${e.asClass.module}")})"
-    showInfo(showRaw(rt))
     rt
   }
 
-  def ol2[T: c.WeakTypeTag] = {
-    val sub = c.weakTypeOf[T].typeSymbol.asClass.knownDirectSubclasses
-    showInfo(show(sub.map(_.asClass.filter(_.isConstructor))))
-    q""
-  }
+  def showInfo(s: String) =
+    c.info(c.enclosingPosition, s.split("\n").mkString("\n |---macro info---\n |", "\n |", ""), true)
 
-  def ol3[T: c.WeakTypeTag] = {
 
-    val sub = c.weakTypeOf[T]
-      .typeConstructor.typeSymbol.asClass.knownDirectSubclasses
+  def ol3[T: c.WeakTypeTag]: c.universe.Tree = {
+
+    //get all sub class
+    val subClass = c.weakTypeOf[T]
+      .typeSymbol.asClass.knownDirectSubclasses
       .map(e => e.asClass.toType)
-    val subParm = sub.map { e =>
-      e.members.filter(_.isConstructor).head.map(s => s.asMethod)
-    }.map(_.asMethod.paramLists.head).map(_.map(e => q"""${e.name.toTermName}:${e.info} """))
 
-    val outfunc =
-      sub zip subParm map {
-        case (clas, parm) =>
-          val a = clas.typeArgs.map(_.toString: TermName).map(e => q"$e")
-          q"""
-            def smartConstructors[..${a}](..${parm})=${clas.typeSymbol.fullName: TermName} (..${parm})
-            """
-      }
-    showInfo(show(outfunc))
-    q"""
-      {
-      class Term{
-        def smartConstructors=1
-        }
-       new Term
-      }
+    //check type params must ia s sealed class
+    if (subClass.size < 1)
+      c.abort(c.enclosingPosition, s"${c.weakTypeOf[T]} is not a sealed class")
 
+    // get sub class constructor params
+    val subConstructorParams = subClass.map { e =>
+      //get constructor
+      e.members.filter(_.isConstructor)
+        //if the class has many Constructor then you need filter the main Constructor
+        .head.map(s => s.asMethod)
+      //get function param list
+    }.map(_.asMethod.paramLists.head)
+      .map(_.map(e => q"""${e.name.toTermName}:${e.info} """))
+
+    val outfunc = subClass zip subConstructorParams map {
+      case (clas, parm) =>
+        q"def smartConstructors[..${
+          clas.typeArgs.map(_.toString).map(name => {
+            //you must write like this
+            //but why i also unknown
+            TypeDef(Modifiers(Flag.PARAM), TypeName(name), List(), TypeBoundsTree(EmptyTree, EmptyTree))
+          })
+        }](..${parm})=${clas.typeSymbol.name.toTermName} (..${parm})"
+    }
+
+    val outClass =
+      q"""
+         object Term{
+                 ..${outfunc}
+                 }
+          """
+    showInfo(show(outClass))
+    q"""{
+      $outClass
+        Term
+      }
       """
   }
 }

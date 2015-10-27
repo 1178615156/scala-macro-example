@@ -19,15 +19,17 @@ class TranMacrosImpl(val c: Context)
 
   import c.universe._
 
-  case class Replace[From, To](from: From, to: To)
+  case class Replace[From, To](from: From, to: To, func: Tree ⇒ Tree)
 
   def replaceList = List(
     Replace(
       List(typeOf[Option[_]].typeConstructor, typeOf[Option[_]].typeConstructor),
-      typeOf[Option[_]].typeConstructor)
+      List(typeOf[Option[_]].typeConstructor), (name: Tree) ⇒ q"$name.flatten")
   )
 
-  def replaceMap: Map[List[c.universe.Type], c.universe.Type] = replaceList.map(e ⇒ e.from → e.to).toMap
+  def replaceMap: Map[List[c.universe.Type], List[c.universe.Type]] = replaceList.map(e ⇒ e.from → e.to).toMap
+
+  def replaceFun: Map[List[c.universe.Type], (c.universe.Tree) ⇒ c.universe.Tree] = replaceList.map(e ⇒ e.from → e.func).toMap
 
   def typeParamsList[T: c.WeakTypeTag]: List[Type] = {
     def getTypeList(it: Type): List[Type] =
@@ -49,122 +51,69 @@ class TranMacrosImpl(val c: Context)
     val replaceMaxSize = replaceMap.keys.maxBy(_.productArity)
 
 
-    def fl[T](l: List[T]) = l.foldLeft(List[List[T]]()) { (l, r) ⇒
-      if (l.isEmpty)
-        l :+ List(r)
-      else
-        l :+ (l.last ::: List(r))
+
+    def fl[T](l: List[T]): List[List[T]] = {
+      l.foldLeft(List[List[T]]()) { (l, r) ⇒
+        if (l.isEmpty)
+          l :+ List(r)
+        else
+          l :+ (l.last ::: List(r))
+      }
     }
-    val b = fl(inTypeList).reverse.tail.reverse
-    showInfo(show(b))
+
+    def exeRep[T](l: List[T],
+                  rep: Map[List[T], List[T]],
+                  repFunc: Map[List[T], Tree ⇒ Tree]): List[(List[T], (Tree) ⇒ Tree)] = {
+      val b = fl(l).reverse.tail.reverse
+      val c = fl(l.reverse).reverse.tail.map(_.reverse)
+
+      val d = b zip c
+      val rt: List[List[T]] = (d filter (e ⇒ rep.get(e._1).nonEmpty)).map(e ⇒ rep.get(e._1).get ::: e._2)
+      val rtFunc =
+        (d filter (e ⇒ rep.get(e._1).nonEmpty)).map(e ⇒ repFunc.get(e._1).get)
+      if (rt.isEmpty)
+        Nil
+      else
+        rt zip rtFunc
+    }
+    type HeadList[T] = List[T]
+
+    def r[T](l: List[T], result: List[T],
+             rep: Map[List[T], List[T]],
+             head: HeadList[T],
+             replaceFun: Map[List[T], Tree ⇒ Tree], exeRepList: List[Tree ⇒ Tree]): Option[(List[T], List[(Tree) ⇒Tree])] = {
+      if (head ::: l == result)
+        Some((head ::: l,exeRepList))
+      else
+      if (l.isEmpty || l.tail.isEmpty || l.tail.tail.isEmpty)
+        None
+      else {
+        val b: List[(List[T], (c.universe.Tree) ⇒ c.universe.Tree)] = exeRep(l, rep, replaceFun)
+        if (b.isEmpty) {
+          val cHead: List[List[T]] = head :: fl(l).reverse.tail.reverse ::: fl(l).reverse.tail.reverse
+          val c = fl(l.reverse).reverse.tail.map(_.reverse) ::: fl(l.reverse).reverse.tail.map(_.reverse)
+          (cHead zip c).map(e ⇒ r(e._2, result, rep, e._1, replaceFun, Nil)).find(_.nonEmpty).flatten
+
+        } else {
+          val rt: List[Option[(List[T], List[(c.universe.Tree) ⇒ c.universe.Tree])]] = b.map {
+            case (b: List[T], repFuncThis) ⇒
+              val cHead = head :: fl(b).reverse.tail.reverse ::: fl(l).reverse.tail.reverse
+              val c = b :: fl(b.reverse).reverse.tail.map(_.reverse) ::: fl(l.reverse).reverse.tail.map(_.reverse)
+              (head :: cHead zip c).map((e: (List[T], List[T])) ⇒ r(e._2, result, rep, e._1, replaceFun, exeRepList)).find(_.nonEmpty).flatten
+
+          }
+          rt.find(_.nonEmpty).flatten
+        }
+
+
+      }
+
+    }
+    val o = r(inTypeList, toTypeList, replaceMap, Nil, replaceFun, Nil)
+
+    //    val b = exeRep(inTypeList, inTypeList)
+//    showInfo(show(o))
 
     q"1"
-    //
-    //    val inType = c.weakTypeOf[In]
-    //    val toType = c.weakTypeOf[To]
-    //
-    //
-    //    def getTypeList(it: Type): List[Type] = {
-    //      if (it.typeArgs.isEmpty)
-    //        List(it)
-    //      else
-    //        it.typeConstructor +: it.typeArgs.flatMap(getTypeList)
-    //    }
-    //
-    //    val inTypeList = getTypeList(inType)
-    //    showInfo(show(inTypeList))
-    //
-    //
-    //
-    //    val toTypeList = getTypeList(toType)
-    //    //    showInfo(show(listToListTuple(inTypeList)()))
-    //
-    //    val ttv: Map[(c.universe.Type, c.universe.Type), c.universe.Type] = Map(
-    //      (typeOf[Option[_]].typeConstructor -> typeOf[Option[_]].typeConstructor
-    //        ) -> typeOf[Option[_]].typeConstructor
-    //    )
-    //    //    showInfo(showRaw(inTypeList.head))
-    //
-    //    //    showInfo(showRaw(c.universe.typeOf[Option[_]]))
-    //    //    showInfo(show(listToListTuple(inTypeList).map(e => ttv.get(e))))
-    //    def t(inTypeList: List[Type], toTypeList: List[Type]): Boolean = {
-    //      if (inTypeList.size == toTypeList.size &&
-    //        inTypeList.zip(toTypeList).forall(t2 => t2._1 <:< t2._2)
-    //      ) {
-    //        showInfo(show(toTypeList) + " == " + show(toTypeList))
-    //        true
-    //      }
-    //      else {
-    //        def listToListTuple[V](list: List[V], rt: List[Tuple2[V, V]] = Nil): List[Tuple2[V, V]] = {
-    //          if (list.isEmpty || list.tail.isEmpty)
-    //            rt
-    //          else {
-    //            listToListTuple(list.tail, rt :+ (list.head -> list.tail.head))
-    //          }
-    //        }
-    //        //        def listChild(list: List[Type], rt: List[List[Type]]) = {
-    //        //          list.tail.foldLeft(list.head -> 0 -> rt) { (l, r) => {
-    //        //            val a: Option[c.universe.Type] =ttv.get(l._1._1 -> r)
-    //        //            if (a.isEmpty)
-    //        //            r -> (l._1._2 + 1)->l._2
-    //        //            else {
-    //        //              l._2.++(list)
-    //        //            }
-    //        //          }
-    //        //          }
-    //        //        }
-    //        //        inTypeList.foldLeft()
-    //        listToListTuple(inTypeList).map(e => ttv.get(e))
-    //        showInfo(show(toTypeList) + " != " + show(toTypeList))
-    //        false
-    //      }
-    //      //      showInfo(show(inType.typeArgs))
-    //      //      showInfo(show(
-    //      //        inType.typeConstructor
-    //      //      ))
-    //      //        if (inType <:< toType) {
-    //      //          showInfo(show(inType) + " == " + show(toType))
-    //      //          true
-    //      //        } else {
-    //      //          false
-    //      //        }
-    //      //      else if (inType.typeArgs.size < 1) {
-    //      //        c.error(c.enclosingPosition,
-    //      //          show(inType) + " un tran to " + show(toType)
-    //      //        ).asInstanceOf[Tree]
-    //      //      } else {
-    //      //
-    //      //        t(inType, inValue)
-    //      //      }
-    //      //      if (inType <:< toType) {
-    //      //        showInfo(show(inType) + " == " + show(toType))
-    //      //        inValue
-    //      //      } else {
-    //      ////        inType.map(e=>e.typeArgs)
-    //      //
-    //      //        inValue
-    //      //      }
-    //
-    //
-    //    }
-    //    t(inTypeList, toTypeList)
-    //    in.tree
-    //    //    showInfo(inType <:< c.typeOf[Option[Option[_]]] toString)
-    //    //    tq"$inType" match {
-    //    //      case tq"Option[Option[Int]]" =>
-    //    //    }
-    //    //    showInfo(show(inType<:<c.typecheck(tq"Option[Option[Int]]").tpe))
-    //
-    //    //    if (inType == toType) {
-    //    //      showInfo("true")
-    //    //    } else {
-    //    //      showInfo("false")
-    //    //    }
-    //    //    showInfo(show(c.weakTypeOf[In]))
-    //
-    //    //    q"""
-    //    //        1
-    //    //    """
-    //    //    in.tree
   }
 }
