@@ -13,3 +13,11 @@ object GetSealedSubClassUsing extends App {
   val a = GetSealedSubClass.ol[A]
   println(a)
 }
+
+sealed trait Hello[A]
+
+case class Ohayo[A, B](a: (A, B)) extends Hello[A]
+
+object GetSealed extends App {
+  GetSealedSubClass.ol3[Hello[_]]
+}
