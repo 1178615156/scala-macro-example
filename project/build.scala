@@ -36,7 +36,9 @@ object P extends Build {
   import BuildSettings._
 
   lazy val macros = Project("macros", file("macros"), settings = buildSettings ++
-    Seq(publishArtifact := false)
+    Seq(
+      organization := "com.yjs"
+    )
   )
 
 
@@ -50,7 +52,8 @@ object P extends Build {
     buildSettings ++ Seq(publishArtifact := false)) dependsOn macros dependsOn macros_try dependsOn stackoverflow
 
   lazy val `scala-macro-example` = Project("scala-macro-example", file("."), settings = buildSettings ++ Seq(
-    organization := "com.yjs"
+    organization := "com.yjs",
+    publishArtifact := false
   )).aggregate(macros, using, macros_try, stackoverflow)
 }
 
