@@ -28,9 +28,9 @@ object BuildSettings {
     scalaVersion := "2.11.7",
     version := "1.0-SNAPSHOT",
     scalacOptions ++= Seq(
-      "-Ymacro-debug-lite",
+//      "-Ymacro-debug-lite",
 //      "-Xexperimental",
-      "-target:jvm-1.8",
+//      "-target:jvm-1.8",
       "-encoding", "UTF-8"
 //      "-Ybackend:GenBCode",
 //      "-Ydelambdafy:method"
