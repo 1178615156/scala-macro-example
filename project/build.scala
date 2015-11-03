@@ -8,8 +8,8 @@ object BuildSettings {
 
   val macroSetting = Seq(
     crossScalaVersions := Seq("2.10.2", "2.10.3", "2.10.4", "2.10.5", "2.11.0", "2.11.1", "2.11.2", "2.11.3", "2.11.4", "2.11.5", "2.11.6", "2.11.7"),
-//    resolvers += Resolver.sonatypeRepo("snapshots"),
-//    resolvers += Resolver.sonatypeRepo("releases"),
+    //    resolvers += Resolver.sonatypeRepo("snapshots"),
+    //    resolvers += Resolver.sonatypeRepo("releases"),
     addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full),
     libraryDependencies <+= (scalaVersion) ("org.scala-lang" % "scala-reflect" % _),
     libraryDependencies ++= (
@@ -25,10 +25,17 @@ object BuildSettings {
   )
 
   val buildSettings = Seq(
-    scalaVersion := "2.11.6",
+    scalaVersion := "2.11.7",
     version := "1.0-SNAPSHOT",
-//    scalacOptions += "-Ymacro-debug-lite",
-    scalacOptions += "-Xexperimental"
+    scalacOptions ++= Seq(
+      "-Ymacro-debug-lite",
+//      "-Xexperimental",
+      "-target:jvm-1.8",
+      "-encoding", "UTF-8"
+//      "-Ybackend:GenBCode",
+//      "-Ydelambdafy:method"
+    )
+//    libraryDependencies += "org.scala-lang.modules" %% "scala-java8-compat" % "0.5.0"
   ) ++ macroSetting ++ publishSetting
 
 }
