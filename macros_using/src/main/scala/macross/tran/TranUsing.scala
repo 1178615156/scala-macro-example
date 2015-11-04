@@ -7,7 +7,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /**
  * Created by YuJieShui on 2015/11/4.
  */
-class TranUsing extends App {
+object TranUsing extends App {
 
   import utils.Traverse._
   import TranMacros._
@@ -31,111 +31,12 @@ class TranUsing extends App {
   )
   println(Await.result(TranMacros[Future[Option[List[Int]]]].apply(b_value), Inf))
 
-}
+  val c_value: Option[List[Future[Int]]] = Option(List(Future(3)))
+  val c_need_result: Future[Option[List[Int]]] =
+    c_value.map(_.traverse).traverse
 
-object TranAlgorithmTest extends App {
-  val option = "option"
-  val future = "future"
-  val value = "value"
-
-  val tranAlgorithm = new TranAlgorithm {
-    override type Type = String
-    override type ExprTree = String
-    override val replaceRule: List[Replace] = List(
-      Replace(List(option, option), List(option), (i: ExprTree) => s"$i.flatten"),
-      Replace(List(future, future), List(future), (i: ExprTree) => s"$i.flatMap(e=>e)"),
-      Replace(List(option, future), List(future, option), (i: ExprTree) => s"$i.traverse")
-    )
-  }
-
-  import tranAlgorithm._
-
-  val in: TypeList = List(option, future, option, option, value)
-  val to: TypeList = List(future, option, option, value)
-
-  //
-  def listTriangleTest(): Unit = {
-
-    assert(listTriangle(List(1).map(_.toString)) ==
-      List(
-        List(1)
-      ).map(_.map(_.toString))
-    )
-
-    assert(
-      listTriangle(List(1, 2, 3, 4).map(_.toString)) ==
-        List(
-          List(1),
-          List(1, 2),
-          List(1, 2, 3),
-          List(1, 2, 3, 4)
-        ).map(_.map(_.toString))
-    )
-    println(listTriangle(List(1, 2, 3, 4).map(_.toString)))
-  }
-
-  listTriangleTest()
-
-  //
-  def splitListTest(): Unit = {
-    assert(splitList(List(1, 2, 3).map(_.toString)) == List(
-      (List("1"), List("2", "3")),
-      (List("1", "2"), List("3"))
-    ))
-    println(splitList(List(1, 2, 3).map(_.toString)))
-  }
-
-  splitListTest()
-
-  //
-  def exeReplaceTest(): Unit = {
-    val rt = exeSingleReplace(in)
-
-    assert(rt.map(e ⇒ e.head ++ e.to) ==
-      List(List(future, option, option, option, value))
-    )
-    println(rt)
-  }
-
-  exeReplaceTest()
-
-  //
-  def exeAllReplaceTest(): Unit = {
-    val rt = exeAllReplace(in)
-    rt.map(_.map(e ⇒ e.head ++ e.to)) == List(
-      List(List(future, option, option, option, value)),
-      List(List(option, future, option, value)),
-      List(List(option, future, option, value))
-    )
-    println(rt)
-  }
-
-  exeAllReplaceTest()
-
-  //
-  def exe(replaceExpr: ReplaceExpr): List[ReplaceExpr] = {
-    val ll = exeAllReplace(replaceExpr.typeList)
-    if (replaceExpr.typeList == to || ll.isEmpty)
-      List(replaceExpr)
-    else {
-      val replaceExprList = ll.flatten.map(e => {
-        type MapFunc = ExprTree ⇒ ExprTree
-
-        val newExprValue = e.head.foldRight(e.replace.func: MapFunc)((r, l) ⇒ {
-          (e: ExprTree) ⇒ s"$e.map(e=>${l("e")})"
-        })(replaceExpr.exprTree)
-
-        ReplaceExpr(newExprValue, e.head ++ e.to)
-      })
-      replaceExprList.flatMap(exe)
-    }
-  }
-
-  val initExpr = "hello"
-
-
-  val rt = exe(ReplaceExpr(initExpr, in)).find(_.typeList == to)
-  assert(rt.nonEmpty)
-  println(rt)
-
+  assert(
+    Await.result(c_need_result, Inf) ==
+      Await.result(TranMacros[Future[Option[List[Int]]]](c_value), Inf)
+  )
 }

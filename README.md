@@ -16,6 +16,9 @@ make constructor        using macro annotation make no args constructor
     a_value.flatten
   assert(TranMacros[Option[Int]](a_value) == a_need_result)
 
+  println(TranMacros[Option[Int]].apply(a_value))
+  //
+
   val b_value: Option[Future[Option[Future[List[Int]]]]] =
     Option(Future(Option(Future(List(2)))))
   val b_need_result: Future[Option[List[Int]]] =
@@ -26,6 +29,14 @@ make constructor        using macro annotation make no args constructor
       Await.result(TranMacros[Future[Option[List[Int]]]](b_value), Inf)
   )
 
+  val c_value: Option[List[Future[Int]]] = Option(List(Future(3)))
+  val c_need_result: Future[Option[List[Int]]] =
+    c_value.map(_.traverse).traverse
+
+  assert(
+    Await.result(c_need_result, Inf) ==
+      Await.result(TranMacros[Future[Option[List[Int]]]](c_value), Inf)
+  )
 ```
 #### get public val
 collect public val to list and map 
