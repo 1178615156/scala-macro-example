@@ -19,10 +19,11 @@ import utils.Traverse._
   val a =  TranMacros[Option[Int]].apply(a_value)
   println(a)//
 
-//  val b_value: Option[Future[Option[Future[List[Int]]]]] = Option(Future(Option(Future(List(2)))))
-//  val b =  TranMacros[Future[Option[List[Int]]]].apply(b_value)
-//  println(b)
-//  println(Await.result(b, scala.concurrent.duration.Duration.Inf))
+  val b_value: Option[Future[Option[Future[List[Int]]]]] = Option(Future(Option(Future(List(2)))))
+  val b_need_result: Future[Option[List[Int]]] =b_value.traverse.map(_.flatten).map(_.traverse).flatMap(e⇒e)
+  val b =  TranMacros[Future[Option[List[Int]]]].apply(b_value)
+  println(b)
+  println(Await.result(b, scala.concurrent.duration.Duration.Inf))
 
 }
 

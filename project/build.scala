@@ -44,12 +44,16 @@ object P extends Build {
 
   import BuildSettings._
 
+  val testFrameworkLib = Seq(
+    "org.testng" % "testng" % "6.9.6" % "test"
+  )
+  val testFrameworkDepend = libraryDependencies ++= testFrameworkLib
+
   lazy val macros = Project("macros", file("macros"), settings = buildSettings ++
     Seq(
       organization := "com.yjs"
-    )
+    ) ++ testFrameworkDepend
   )
-
 
   lazy val macros_try = Project("macros_try", file("macros_try"),
     settings = buildSettings ++ Seq(publishArtifact := false)) dependsOn macros

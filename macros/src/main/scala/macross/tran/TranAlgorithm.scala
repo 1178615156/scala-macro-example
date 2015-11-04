@@ -1,5 +1,8 @@
 package macross.tran
 
+import scala.concurrent.Future
+import scala.reflect.macros.blackbox
+
 /**
  * Created by YuJieShui on 2015/11/3.
  */
@@ -13,13 +16,7 @@ trait TranAlgorithm {
   val replaceRule: List[Replace]
 
   /** list triangle
-    * @example :in:List(1, 2, 3, 4)
-    *          out:List(
-    *          List(1),
-    *          List(1, 2),
-    *          List(1, 2, 3),
-    *          List(1, 2, 3, 4)
-    *          )
+    * @example :see[[macross.tran.TranAlgorithmTest]]
     * @param list
     * @return
     */
@@ -32,6 +29,11 @@ trait TranAlgorithm {
     }
   }
 
+  /**
+   * @example :see[[macross.tran.TranAlgorithmTest]]
+   * @param l
+   * @return
+   */
   def splitList(l: TypeList): List[(TypeList, TypeList)] = {
     val headTypeList: List[TypeList] = listTriangle(l) dropRight 1
 
@@ -43,12 +45,7 @@ trait TranAlgorithm {
   case class ReplaceResult(replace: Replace, from: TypeList, to: TypeList, head: TypeList = Nil)
 
   /**
-   * @example   val replaceRule = List(
-   *            Replace(List(1, 2), List(3), (i: Tree) => 1),
-   *            Replace(List(1, 2 ,3 ), List(3), (i: Int) => 2)
-   *            )
-   *            in: List(1,2,3,4)
-   *            out: List((..,3,3,4),(..,3,4))
+   * @example :see[[macross.tran.TranAlgorithmTest]]
    * @param l
    * @return
    */
@@ -66,4 +63,32 @@ trait TranAlgorithm {
     } filter (_.nonEmpty)
   }
 
+  case class ReplaceExpr(exprTree: ExprTree, typeList: TypeList)
+
+}
+
+trait TranMacroInstance extends TranAlgorithm {
+  self: TranAlgorithm ⇒
+  val c: blackbox.Context
+  type Type = c.universe.Type
+  type ExprTree = c.universe.Tree
+}
+
+trait TranRule {
+  self: TranAlgorithm with TranMacroInstance ⇒
+
+  import c.universe._
+
+  lazy val option: Type = c.typeOf[Option[_]].typeConstructor
+  lazy val future: Type = c.typeOf[Future[_]].typeConstructor
+  lazy val list: Type = c.typeOf[List[_]].typeConstructor
+
+
+  lazy val replaceRule: List[Replace] = List(
+    Replace(List(option, option), List(option), (i: ExprTree) => q"$i.flatten"),
+    Replace(List(future, future), List(future), (i: ExprTree) => q"$i.flatMap(e=>e)"),
+    Replace(List(option, future), List(future, option), (i: ExprTree) => q"$i.traverse"),
+    Replace(List(list, future), List(future, list), (i: ExprTree) => q"$i.traverse")
+
+  )
 }
