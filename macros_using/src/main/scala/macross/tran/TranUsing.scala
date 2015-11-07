@@ -7,36 +7,69 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /**
  * Created by YuJieShui on 2015/11/4.
  */
+object Data {
+
+  import utils.Traverse._
+
+  object a {
+    val value = Option(Option(1))
+    val need_result: Option[Int] = value.flatten
+    type To = Option[Int]
+  }
+
+  object b {
+    val value: Option[Future[Option[Future[List[Int]]]]] = Option(Future(Option(Future(List(2)))))
+    val need_result: Future[Option[List[Int]]] =
+      value.traverse.map(_.flatten).map(_.traverse).flatMap(e ⇒ e)
+    type To = Future[Option[List[Int]]]
+  }
+
+  object c {
+    val value: Option[List[Future[Int]]] = Option(List(Future(3)))
+    val need_result: Future[Option[List[Int]]] =
+      value.map(_.traverse).traverse
+    type To = Future[Option[List[Int]]]
+  }
+
+}
+
 object TranUsing extends App {
 
   import utils.Traverse._
   import TranMacros._
 
-  val a_value = Option(Option(1))
-  val a_need_result: Option[Int] =
-    a_value.flatten
-  assert(TranMacros[Option[Int]](a_value) == a_need_result)
+  def TranMacrosApply(): Unit = {
+    import Data._
 
-  println(TranMacros[Option[Int]].apply(a_value))
-  //
+    assert(
+      TranMacros[Option[Int]](a.value) == a.need_result)
 
-  val b_value: Option[Future[Option[Future[List[Int]]]]] =
-    Option(Future(Option(Future(List(2)))))
-  val b_need_result: Future[Option[List[Int]]] =
-    b_value.traverse.map(_.flatten).map(_.traverse).flatMap(e ⇒ e)
+    assert(Await.result(
+      TranMacros[Future[Option[List[Int]]]](b.value) zip b.need_result map (e ⇒ e._1 == e._2)
+      , Inf))
 
-  assert(
-    Await.result(b_need_result, Inf) ==
-      Await.result(TranMacros[Future[Option[List[Int]]]](b_value), Inf)
-  )
-  println(Await.result(TranMacros[Future[Option[List[Int]]]].apply(b_value), Inf))
+    assert(Await.result(
+      TranMacros[Future[Option[List[Int]]]](c.value) zip c.need_result map (e ⇒ e._1 == e._2)
+      , Inf))
+  }
 
-  val c_value: Option[List[Future[Int]]] = Option(List(Future(3)))
-  val c_need_result: Future[Option[List[Int]]] =
-    c_value.map(_.traverse).traverse
 
-  assert(
-    Await.result(c_need_result, Inf) ==
-      Await.result(TranMacros[Future[Option[List[Int]]]](c_value), Inf)
-  )
+  def TranTo(): Unit = {
+    import Data._
+    assert(
+      a.value.tranTo[Option[Int]] == a.need_result
+    )
+    assert(
+      a.value.tranTo[a.To] == a.need_result
+    )
+    assert(Await.result(
+      b.value.tranTo[b.To] zip b.need_result map (e ⇒ e._1 == e._2)
+      , Inf)
+    )
+  }
+
+  TranTo()
+  /// with tranTo
+
+
 }

@@ -92,3 +92,58 @@ trait TranRule {
 
   )
 }
+
+trait TranExe extends macross.base.ShowInfo{
+  self: TranAlgorithm with TranMacroInstance with TranRule ⇒
+
+  import c.universe._
+
+  def in: TypeList
+
+  def to: TypeList
+
+  /**
+   *
+   * @param replaceExpr
+   * @return
+   */
+  def exe(replaceExpr: ReplaceExpr): List[ReplaceExpr] = {
+//    showInfo(show(replaceExpr))
+    val ll = exeAllReplace(replaceExpr.typeList)
+    if (replaceExpr.typeList == to || ll.isEmpty)
+      List(replaceExpr)
+    else {
+      val replaceExprList = ll.flatten.map(e => {
+        type MapFunc = ExprTree ⇒ ExprTree
+
+        val newExprValue = e.head.foldRight(e.replace.func: MapFunc)((r, l) ⇒ {
+          (e: ExprTree) ⇒ q"$e.map(e=>${l(q"${"e": TermName}")})"
+        })(replaceExpr.exprTree)
+
+        ReplaceExpr(newExprValue, e.head ++ e.to)
+      })
+      replaceExprList.flatMap(exe)
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
