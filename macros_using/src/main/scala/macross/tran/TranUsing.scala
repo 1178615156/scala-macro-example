@@ -57,9 +57,6 @@ object TranUsing extends App {
   def TranTo(): Unit = {
     import Data._
     assert(
-      a.value.tranTo[Option[Int]] == a.need_result
-    )
-    assert(
       a.value.tranTo[a.To] == a.need_result
     )
     assert(Await.result(

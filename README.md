@@ -11,32 +11,31 @@ make constructor        using macro annotation make no args constructor
 ```
 #### auto type tran
 ```scala
-  val a_value = Option(Option(1))
-  val a_need_result: Option[Int] =
-    a_value.flatten
-  assert(TranMacros[Option[Int]](a_value) == a_need_result)
 
-  println(TranMacros[Option[Int]].apply(a_value))
-  //
+  object a {
+    val value = Option(Option(1))
+    val need_result: Option[Int] = value.flatten
+    type To = Option[Int]
+  }
 
-  val b_value: Option[Future[Option[Future[List[Int]]]]] =
-    Option(Future(Option(Future(List(2)))))
-  val b_need_result: Future[Option[List[Int]]] =
-    b_value.traverse.map(_.flatten).map(_.traverse).flatMap(e ⇒ e)
+  object b {
+    val value: Option[Future[Option[Future[List[Int]]]]] = Option(Future(Option(Future(List(2)))))
+    val need_result: Future[Option[List[Int]]] =
+      value.traverse.map(_.flatten).map(_.traverse).flatMap(e ⇒ e)
+    type To = Future[Option[List[Int]]]
+  }
 
-  assert(
-    Await.result(b_need_result, Inf) ==
-      Await.result(TranMacros[Future[Option[List[Int]]]](b_value), Inf)
-  )
+    import Data._
 
-  val c_value: Option[List[Future[Int]]] = Option(List(Future(3)))
-  val c_need_result: Future[Option[List[Int]]] =
-    c_value.map(_.traverse).traverse
+// use like this
 
-  assert(
-    Await.result(c_need_result, Inf) ==
-      Await.result(TranMacros[Future[Option[List[Int]]]](c_value), Inf)
-  )
+    assert(
+      a.value.tranTo[a.To] == a.need_result
+    )
+    assert(Await.result(
+      b.value.tranTo[b.To] zip b.need_result map (e ⇒ e._1 == e._2)
+      , Inf)
+    )
 ```
 #### get public val
 collect public val to list and map 
