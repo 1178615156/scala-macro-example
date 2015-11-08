@@ -51,8 +51,8 @@ class SortByNameImpl(val c: Context) extends macross.base.ShowInfo {
 
         }
         """
-
-    showInfo(show(rt))
+    if (false)
+      showInfo(show(rt))
     rt
   }
 }
