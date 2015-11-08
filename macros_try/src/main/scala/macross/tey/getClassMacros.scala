@@ -1,4 +1,4 @@
-package macross.teach
+package macross.tey
 
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context

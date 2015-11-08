@@ -1,8 +1,8 @@
 package macross
 
 /**
- * Created by YuJieShui on 2015/9/10.
- */
+  * Created by YuJieShui on 2015/9/10.
+  */
 
 object GetPublicValUsing extends App {
 
@@ -20,8 +20,8 @@ object GetPublicValUsing extends App {
        |---
        |module1
        |list: ${Module_1.list}
-        |map:  ${Module_1.map}
-        |---
+       |map:  ${Module_1.map}
+       |---
    """.stripMargin)
 
   object Module_2 extends base.Enum[String] {
@@ -40,8 +40,8 @@ object GetPublicValUsing extends App {
        |---
        |module2
        |list: ${Module_2.list}
-        |map:  ${Module_2.map}
-        |---
+       |map:  ${Module_2.map}
+       |---
    """.stripMargin)
 
 

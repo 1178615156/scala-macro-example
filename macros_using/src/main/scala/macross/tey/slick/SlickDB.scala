@@ -1,4 +1,4 @@
-package macross.teach.slick
+package macross.tey.slick
 
 /**
  * Created by YuJieShui on 2015/9/23.
