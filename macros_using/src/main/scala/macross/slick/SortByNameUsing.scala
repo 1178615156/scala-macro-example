@@ -35,7 +35,7 @@ object UserTable {
   def apply() = table
 }
 
-object SortWithUsing extends App {
+object SortByNameUsing extends App {
 
   val b = UserTable.table.sortBy((e: UserTable) => SortByName.apply(e, "name", true))
   //等价于
