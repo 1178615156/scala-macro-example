@@ -41,6 +41,6 @@ object BuildSettings {
       //      "-Ydelambdafy:method"
     )
     //    libraryDependencies += "org.scala-lang.modules" %% "scala-java8-compat" % "0.5.0"
-  ) ++ macroSetting ++ resolversSetting
+  ) ++ macroSetting ++ resolversSetting ++ publishSetting
 
 }

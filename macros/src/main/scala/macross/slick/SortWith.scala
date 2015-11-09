@@ -5,14 +5,16 @@ import scala.reflect.macros.blackbox.Context
 
 
 /**
-  * Created by yu jie shui on 2015/11/8 19:09.
-  */
-
-object SortByName {
+ * Created by yu jie shui on 2015/11/8 19:09.
+ */
+trait SortByName {
   def apply[EntityTable](entityTable: EntityTable,
                          sortField: String,
                          asc: Boolean): slick.lifted.Ordered = macro SortByNameImpl.apply[EntityTable]
+
 }
+
+object SortByName extends SortByName
 
 class SortByNameImpl(val c: Context) extends macross.base.ShowInfo {
 
