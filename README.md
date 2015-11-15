@@ -1,9 +1,10 @@
 # scala-macro-example
-src/main is use
 
-module/macros is macro impl
+macros is macro impl
+macros_using is example
 ```
 tran                    auto type tran
+slick sort by name      slick sort by name
 get public val          collect public val to list and map
 make get set            using macro annotation make get set method 
 make constructor        using macro annotation make no args constructor
@@ -36,6 +37,29 @@ make constructor        using macro annotation make no args constructor
       b.value.tranTo[b.To] zip b.need_result map (e ⇒ e._1 == e._2)
       , Inf)
     )
+```
+#### slick sort by name
+when we want sort by field name we need write follow code
+```scala
+val sortFieldName = "id"
+sortFieldName match {
+      case "id" => if (true)
+        e.id.asc
+      else
+        e.id.desc
+      case "name" => if (true)
+        e.name.asc
+      else
+        e.name.desc
+      case "mobile" => if (true)
+        e.mobile.asc
+      else
+        e.mobile.desc
+    }
+```
+this is boring, so use sortByName improve it
+```scala
+table.sortBy((e) => SortByName.apply(e, "name", true))
 ```
 #### get public val
 collect public val to list and map 
