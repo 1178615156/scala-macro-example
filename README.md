@@ -42,20 +42,22 @@ make constructor        using macro annotation make no args constructor
 when we want sort by field name we need write follow code
 ```scala
 val sortFieldName = "id"
-sortFieldName match {
-      case "id" => if (true)
-        e.id.asc
-      else
-        e.id.desc
-      case "name" => if (true)
-        e.name.asc
-      else
-        e.name.desc
-      case "mobile" => if (true)
-        e.mobile.asc
-      else
-        e.mobile.desc
-    }
+table.sortBy((e)=>
+    sortFieldName match {
+        case "id" => if (true)
+          e.id.asc
+        else
+          e.id.desc
+        case "name" => if (true)
+          e.name.asc
+        else
+          e.name.desc
+        case "mobile" => if (true)
+          e.mobile.asc
+        else
+          e.mobile.desc
+      }
+)
 ```
 this is boring, so use sortByName improve it
 ```scala
