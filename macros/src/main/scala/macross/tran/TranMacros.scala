@@ -62,7 +62,7 @@ class TranMacrosImpl(val c: Context) extends macross.base.ShowInfo {
 
     val rt = {
       import Tran._
-      exe(ReplaceExpr(inExpr.tree, in)).find(_.typeList == to)
+      exe(ReplaceExpr(inExpr.tree, in)).find(_.typeList >:> to)
     }
 
     showInfo(

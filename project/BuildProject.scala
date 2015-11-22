@@ -10,7 +10,7 @@ object BuildProject extends Build {
   val unPublish = publishArtifact := false
 
   lazy val macros = Project("macros", file("macros"), settings =
-    buildSettings ++ testFrameworkDepend ++ slickDepend
+    buildSettings ++ testFrameworkDepend ++ slickDepend ++ akkaDepend
   )
 
   lazy val macros_try = Project("macros_try", file("macros_try"), settings =

@@ -1,5 +1,7 @@
 package macross.tran
 
+import slick.dbio.DBIO
+
 import scala.concurrent.duration.Duration.Inf
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -9,7 +11,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
  */
 object Data {
 
-  import utils.Traverse._
+  import utils.TraverseSequence._
 
   object a {
     val value = Option(Option(1))
@@ -20,14 +22,14 @@ object Data {
   object b {
     val value: Option[Future[Option[Future[List[Int]]]]] = Option(Future(Option(Future(List(2)))))
     val need_result: Future[Option[List[Int]]] =
-      value.traverse.map(_.flatten).map(_.traverse).flatMap(e ⇒ e)
+      value.sequence.map(_.flatten).map(_.sequence).flatMap(e ⇒ e)
     type To = Future[Option[List[Int]]]
   }
 
   object c {
     val value: Option[List[Future[Int]]] = Option(List(Future(3)))
     val need_result: Future[Option[List[Int]]] =
-      value.map(_.traverse).traverse
+      value.map(_.sequence).sequence
     type To = Future[Option[List[Int]]]
   }
 
@@ -35,7 +37,7 @@ object Data {
 
 object TranUsing extends App {
 
-  import utils.Traverse._
+  import utils.TraverseSequence._
   import TranMacros._
 
   def TranMacrosApply(): Unit = {
@@ -67,6 +69,7 @@ object TranUsing extends App {
 
   TranTo()
   /// with tranTo
+Some(Some(1)).tranTo[Option[Int]]
 
-
+  List(DBIO.from(Future(1))).tranTo[DBIO[List[Int]]]
 }

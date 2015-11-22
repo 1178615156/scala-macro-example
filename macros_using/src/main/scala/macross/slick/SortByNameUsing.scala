@@ -17,8 +17,7 @@ case class User(
                  id: Long
                )
 
-class UserTable(tag: Tag)
-  extends Table[User](tag, "user") {
+class UserTable(tag: Tag) extends Table[User](tag, "user") {
 
   val mobile = column[String]("mobile")
   val name = column[Option[String]]("name")

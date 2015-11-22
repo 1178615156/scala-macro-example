@@ -19,8 +19,8 @@ object BuildSettings {
   )
 
   val resolversSetting: Seq[Def.Setting[Seq[Resolver]]] = Seq(
-    resolvers += "Nexus" at nexus_url + "content/groups/public",
-    resolvers += Resolver.url("Edulify Repository", url(s"http://$nexus_ip:8081/nexus/content/groups/public"))(Resolver.ivyStylePatterns)
+//    resolvers += "Nexus" at nexus_url + "content/groups/public",
+//    resolvers += Resolver.url("Edulify Repository", url(s"http://$nexus_ip:8081/nexus/content/groups/public"))(Resolver.ivyStylePatterns)
   )
 
   val publishSetting = Seq(
