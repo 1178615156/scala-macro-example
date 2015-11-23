@@ -4,7 +4,7 @@ import Keys._
 object BuildSettings {
 
 
-  val nexus_ip = "localhost"
+  val nexus_ip = "192.168.1.200"
   val nexus_url = s"http://$nexus_ip:8081/nexus/"
   val paradiseVersion = "2.1.0-M5"
 

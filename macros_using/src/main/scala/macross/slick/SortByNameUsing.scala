@@ -3,19 +3,20 @@ package macross.slick
 import slick.lifted.Rep
 
 /**
-  * Created by yu jie shui on 2015/11/8 20:21.
-  */
+ * Created by yu jie shui on 2015/11/8 20:21.
+ */
 object SlickDb {
   val api: slick.driver.MySQLDriver.api.type = slick.driver.MySQLDriver.api
   Rep
 }
+
 import SlickDb.api._
 
 case class User(
                  mobile: String,
                  name: Option[String],
                  id: Long
-               )
+                 )
 
 class UserTable(tag: Tag) extends Table[User](tag, "user") {
 
@@ -36,7 +37,7 @@ object UserTable {
 
 object SortByNameUsing extends App {
 
-  val b = UserTable.table.sortBy((e: UserTable) => SortByName.apply(e, "name", true))
+  val b = UserTable.table.sortBy((e: UserTable) => SortByName.applyDebug(e, "name", true))
   //等价于
   val a = UserTable.table.sortBy(e => {
     ("name" match {
