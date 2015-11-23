@@ -3,6 +3,8 @@ package macross.slick
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 
+import slick.lifted.ForeignKeyQuery
+
 
 /**
  * Created by yu jie shui on 2015/11/8 19:09.
@@ -10,13 +12,18 @@ import scala.reflect.macros.blackbox.Context
 trait SortByName {
   def apply[EntityTable](entityTable: EntityTable,
                          sortField: String,
-                         asc: Boolean): slick.lifted.Ordered = macro SortByNameImpl.apply[EntityTable]
+                         asc: Boolean): slick.lifted.Ordered = macro SortByNameImpl.NoShowInfo.apply[EntityTable]
 
+  def applyDebug[EntityTable](entityTable: EntityTable,
+                              sortField: String,
+                              asc: Boolean): slick.lifted.Ordered = macro SortByNameImpl.ShowInfo.apply[EntityTable]
 }
 
 object SortByName extends SortByName
 
-class SortByNameImpl(val c: Context) extends macross.base.ShowInfo {
+trait SortByNameImpl extends macross.base.ShowInfo {
+  val c: Context
+  val showInfoSwitch: Boolean
 
   import c.universe._
 
@@ -29,6 +36,7 @@ class SortByNameImpl(val c: Context) extends macross.base.ShowInfo {
       .filter(_.isMethod)
       .map(_.asMethod)
       .filter(_.info.resultType <:< typeOf[slick.lifted.Rep[_]])
+      .filter(e ⇒ !(e.info.resultType <:< typeOf[ForeignKeyQuery[_, _]]))
       .map(e => e.name.toString -> e.info.resultType)
       .filter(_._1 != "encodeRef")
       .filter(_._1 != "<init>")
@@ -53,8 +61,20 @@ class SortByNameImpl(val c: Context) extends macross.base.ShowInfo {
 
         }
         """
-    if (false)
+    if (showInfoSwitch)
       showInfo(show(rt))
     rt
   }
+}
+
+object SortByNameImpl {
+
+  class NoShowInfo(val c: Context) extends SortByNameImpl {
+    val showInfoSwitch = false
+  }
+
+  class ShowInfo(val c: Context) extends SortByNameImpl {
+    val showInfoSwitch = true
+  }
+
 }
