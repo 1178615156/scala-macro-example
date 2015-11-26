@@ -14,6 +14,8 @@ class TranAlgorithmTest {
       Replace(List(future, future), List(future), (i: ExprTree) => s"$i.flatMap(e=>e)"),
       Replace(List(option, future), List(future, option), (i: ExprTree) => s"$i.traverse")
     )
+
+    override def >:> (l: TypeList, r: TypeList): Boolean = ???
   }
 
   import tranAlgorithm._
