@@ -5,13 +5,13 @@ import slick.dbio.DBIO
 import scala.concurrent.duration.Duration.Inf
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import utils.TraverseSequence._
 
 /**
  * Created by YuJieShui on 2015/11/4.
  */
 object Data {
 
-  import utils.TraverseSequence._
 
   object a {
     val value = Option(Option(1))
@@ -37,24 +37,22 @@ object Data {
 
 object TranUsing extends App {
 
-  import utils.TraverseSequence._
-  import TranMacros._
+  import TranToMacros._
 
-  def TranMacrosApply(): Unit = {
-    import Data._
-
-    assert(
-      TranMacros[Option[Int]](a.value) == a.need_result)
-
-    assert(Await.result(
-      TranMacros[Future[Option[List[Int]]]](b.value) zip b.need_result map (e ⇒ e._1 == e._2)
-      , Inf))
-
-    assert(Await.result(
-      TranMacros[Future[Option[List[Int]]]](c.value) zip c.need_result map (e ⇒ e._1 == e._2)
-      , Inf))
-  }
-
+//  def TranMacrosApply(): Unit = {
+//    import Data._
+//
+//    assert(
+//      TranMacros[Option[Int]](a.value) == a.need_result)
+//
+//    assert(Await.result(
+//      TranMacros[Future[Option[List[Int]]]](b.value) zip b.need_result map (e ⇒ e._1 == e._2)
+//      , Inf))
+//
+//    assert(Await.result(
+//      TranMacros[Future[Option[List[Int]]]](c.value) zip c.need_result map (e ⇒ e._1 == e._2)
+//      , Inf))
+//  }
 
   def TranTo(): Unit = {
     import Data._

@@ -25,14 +25,15 @@ trait TranToMacros {
   }
 
 }
-
-class TranMacros[To] {
-  def apply[In](inExpr: In): To = macro TranMacrosImpl.apply[In, To]
-}
-
-object TranMacros extends TranToMacros {
-  def apply[To]: TranMacros[To] = new TranMacros[To]
-}
+object TranToMacros extends TranToMacros
+//
+//class TranMacros[To] {
+//  def apply[In](inExpr: In): To = macro TranMacrosImpl.apply[In, To]
+//}
+//
+//object TranMacros   {
+//  def apply[To]: TranMacros[To] = new TranMacros[To]
+//}
 
 class TranMacrosImpl(val c: Context) extends macross.base.ShowInfo {
   self =>
@@ -79,7 +80,7 @@ class TranMacrosImpl(val c: Context) extends macross.base.ShowInfo {
     val toType = c.weakTypeOf[To]
 
     q"""
-  new TranMacros.TranTo[$inType,$toType]{
+  new TranToMacros.TranTo[$inType,$toType]{
     def tranTo(in : $inType):$toType=${apply[In,To](c.Expr(q"in"))}
   }
   """

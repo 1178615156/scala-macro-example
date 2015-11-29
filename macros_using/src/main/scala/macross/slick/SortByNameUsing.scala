@@ -1,46 +1,23 @@
 package macross.slick
 
-import slick.lifted.Rep
+import macross.slick.UserTable.UserTable
+import slick.ast.{ColumnOption, TypedType}
+import slick.lifted
+import slick.lifted.{ProvenShape, Rep}
 
-/**
- * Created by yu jie shui on 2015/11/8 20:21.
- */
-object SlickDb {
-  val api: slick.driver.MySQLDriver.api.type = slick.driver.MySQLDriver.api
-  Rep
-}
 
 import SlickDb.api._
 
-case class User(
-                 mobile: String,
-                 name: Option[String],
-                 id: Long
-                 )
-
-class UserTable(tag: Tag) extends Table[User](tag, "user") {
-
-  val mobile = column[String]("mobile")
-  val name = column[Option[String]]("name")
-  val id = column[Long]("id", O.PrimaryKey)
-
-  def * = (mobile, name, id) <>(
-    User.tupled, User.unapply
-    )
-}
-
-object UserTable {
-  val table = TableQuery[UserTable]
-
-  def apply() = table
-}
 
 object SortByNameUsing extends App {
 
-  val b = UserTable.table.sortBy((e: UserTable) => SortByName.applyDebug(e, "name", true))
+  val sortField = "name"
+
+
+  val a = UserTable.table.sortBy((e: UserTable) => SortByName.applyDebug(e, sortField, true))
   //等价于
-  val a = UserTable.table.sortBy(e => {
-    ("name" match {
+  val b = UserTable.table.sortBy(e => {
+    (sortField match {
       case "id" => if (true)
         e.id.asc
       else
@@ -55,4 +32,11 @@ object SortByNameUsing extends App {
         e.mobile.desc
     }): slick.lifted.Ordered
   })
+  User.table join Address.table sortBy{
+    case(user,address)=>
+      SortByName.applyPrefix(user,true,"") orElse
+      SortByName.applyPrefix(address,true,"address.") apply
+        sortField
+  }
+
 }
