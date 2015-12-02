@@ -13,17 +13,15 @@ private case class SlickModelColumnSwap[Column, ModelField]
   * Created by yu jie shui on 2015/11/26 16:21.
   */
 object SlickStarMacro {
-  def apply[ClassType, ModelType]: slick.lifted.ProvenShape[ModelType] =
-  macro SlickStarMacroImpl.apply[ClassType, ModelType]
-
-  //todo
-  //  private def apply_v2[ClassType, ModelType](fs: SlickModelColumnSwap[_, _]*): slick.lifted.ProvenShape[ModelType] =
-  //  macro SlickStarMacroImpl.apply[ClassType, ModelType]
+  def apply[ClassType, ModelType]: slick.lifted.ProvenShape[ModelType] = macro SlickStarMacroImpl.apply[ClassType, ModelType]
 }
 
-class SlickStarMacroImpl(val c: Context) extends macross.base.ShowInfo {
+class SlickStarMacroImpl(val c: Context) {
 
   import c.universe._
+
+  def showInfo(s: String) =
+    c.info(c.enclosingPosition, s.split("\n").mkString("\n |---macro info---\n |", "\n |", ""), true)
 
   //todo
   //  def apply_v2[ClassType: c.WeakTypeTag, ModelType: c.WeakTypeTag](fs: c.Expr[SlickModelColumnSwap[_, _]]*): c.universe.Tree
@@ -34,40 +32,40 @@ class SlickStarMacroImpl(val c: Context) extends macross.base.ShowInfo {
     val reps = classType.members
       .filter(_.isMethod).map(_.asMethod)
       .filter(_.isPublic)
-      .filter(_.info.resultType <:< typeOf[slick.lifted.Rep[_]])
-      .filter(e ⇒ !(e.info.resultType <:< typeOf[ForeignKeyQuery[_, _]]))
-      //      .filter(e ⇒ modelType.members.map(_.name.toString).exists(_ == e.name.toString))
+      .filter(_.returnType.finalResultType.typeConstructor =:= typeOf[slick.lifted.Rep[_]].typeConstructor)
+      .filterNot(_.isConstructor)
+      .filterNot(_.name.toString == "column")
       .toList.reverse.map(_.name.toTermName)
 
-    showInfo(show(reps))
+    //    showInfo(show(reps))
     val repsHList = reps.foldRight(c.Expr(q"HNil")) { (l, r) ⇒
       c.Expr(q"new HCons($l,$r)")
     }
-    showInfo(show(repsHList))
-    def hListToModel = {
-      q"{case hlist => ${modelType.companion.typeSymbol.name.toString: TermName}(..${
+    //    showInfo(show(repsHList))
+    val hListToModel = {
+      q"{case hlist => ${modelType.typeSymbol.name.toString: TermName}(..${
         reps.indices zip reps map {
-          case (index, rep) ⇒ q"hlist($index)"
+          case (index, rep) ⇒ q"$rep = hlist($index)"
         }
       })}"
     }
-    def modelToHList = {
+    val modelToHList = {
       q"(model:$modelType) => Option((${
         reps.map(x ⇒ q"model.$x").foldRight(c.Expr(q"HNil")) { (l, r) ⇒
           c.Expr(q"new HCons($l,$r)")
         }
       }))"
     }
-    showInfo(show(hListToModel))
-    showInfo(show(modelToHList))
+    //    showInfo(show(hListToModel))
+    //    showInfo(show(modelToHList))
     val rt =
       q"""{
    import slick.collection.heterogeneous._
-    (${repsHList}).shaped<>($hListToModel,$modelToHList)
+    ($repsHList).shaped<>($hListToModel,$modelToHList)
         }
       """
 
-    showInfo(show(rt))
+    showInfo("def * =" + show(rt))
     rt
   }
 }

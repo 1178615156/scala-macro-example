@@ -24,8 +24,12 @@ object User{
 object UserTable {
   val table = TableQuery[UserTable]
 
-  trait Column {
-    self: Table[User] =>
+//  trait Column {
+//    self: Table[User] =>
+//
+//  }
+
+  class UserTable(tag: Tag) extends Table[User](tag, "user") {
     val mobile = column[String]("mobile")
     val name = column[Option[String]]("name")
     val address_code = column[Int]("")
@@ -33,11 +37,15 @@ object UserTable {
 
     val address = foreignKey("", address_code, Address.table)(_.code)
 
-    def * : ProvenShape[User] = SlickStarMacro.apply[Column, User]
-
+    def * : ProvenShape[User] = ??? //SlickStarMacro.apply[UserTable, User]
+//    def * ={
+//      import slick.collection.heterogeneous._;
+//      new HCons(keyword, new HCons(user_id, HNil)).shaped.$less$greater(<empty> match {
+//      case (hlist @ _) => SearchWordHistory(hlist(0), hlist(1))
+//      }, ((model: macross.slick.SearchWordHistory) => Option(new HCons(model.keyword, new HCons(model.user_id, HNil)))))
+//      }
   }
-
-  class UserTable(tag: Tag) extends Table[User](tag, "user") with Column
-
   def apply() = table
 }
+
+
