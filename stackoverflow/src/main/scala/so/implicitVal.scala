@@ -1,4 +1,4 @@
-package macross
+package so
 
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox

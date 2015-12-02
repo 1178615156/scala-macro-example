@@ -1,4 +1,4 @@
-package macross
+package so
 
 import scala.language.experimental.macros
 import scala.language.higherKinds
@@ -7,12 +7,12 @@ import scala.reflect.macros.blackbox.Context
 /**
  * Created by YuJieShui on 2015/10/27.
  */
-private[macross] object MakeHasTypeParamFunc {
+ object MakeHasTypeParamFunc {
   def ol3[T]: Any = macro MakeTpeParamFuncImpl.ol3[T]
 
 }
 
-class MakeTpeParamFuncImpl(val c: Context) extends base.ShowInfo {
+class MakeTpeParamFuncImpl(val c: Context) extends macross.base.ShowInfo {
 
   import c.universe._
 

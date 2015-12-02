@@ -1,4 +1,4 @@
-package macross
+package so
 
 import macross.base.ShowInfo
 
