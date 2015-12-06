@@ -1,29 +1,54 @@
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import slick.collection.heterogeneous.HList
 
-val a = Future(1)
-val b = Future(2)
-val c = Future(3)
-val d = Future(4)
-val e = Future(5)
+trait NodeTypes {
+
+      trait Node {
+        def allNodesHaveThis: Int
+      }
+
+    }
+
+    object NodeTypes extends NodeTypes
+
+    trait ScrumptiousTypes extends NodeTypes {
+
+      trait Node {
+        def scrumptiousness: Int
+      }
+
+      type ScrumptiousTypesNode = this.Node
+    }
+
+    object ScrumptiousTypes extends ScrumptiousTypes
+
+    trait YummyTypes extends NodeTypes {
+
+      trait Node {
+        def yumminess: Int
+      }
+
+      type YummyTypesNode = this.Node
+    }
+
+    object YummyTypes extends YummyTypes
+
+    trait Nodes {
+
+      trait Nodes extends NodeTypes.Node with  YummyTypes.Node with ScrumptiousTypes.Node
+
+    }
 
 
-implicit class WithZZ[T](val f1: Future[T]) {
-  def zz[T2](f: Future[T2]) = f1 zip f
-}
+    object Graph extends  Nodes {
 
-implicit class WithZZ2[T1, T2](val f2: Future[(T1, T2)]) {
-  def t[T1, T2, T](t: ((T1, T2), T)) = (t._1._1, t._1._2, t._2)
+      case class Nodes() extends super.Nodes {
+        override def yumminess: Int = 1
+    //
+        override def scrumptiousness: Int = 2
 
-  def zz[T](f: Future[T]) = f2 zip f map t
-}
+        override def allNodesHaveThis: Int = 3
+      }
 
-implicit class WithZZ3[T1, T2, T3](val f2: Future[(T1, T2, T3)]) {
-  def t[T1, T2, T3, T](t: ((T1, T2, T3), T)) = (t._1._1, t._1._2, t._1._3, t._2)
+    }
 
-  def zz[T](f: Future[T]) = f2 zip f map t
-}
-Future
-val z: Future[(Int, Int, Int, Int)] = a zz b zz c zz d
-
-
+HList
