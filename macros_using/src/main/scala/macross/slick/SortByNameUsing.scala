@@ -12,11 +12,17 @@ import SlickDb.api._
 object SortByNameUsing extends App {
 
   val sortField = "name"
+  val l         = List("id")
 
+  val a          = UserTable.table.sortBy((e: UserTable) => SortByName.applyDebug(e, l.head, true))
 
-  val a = UserTable.table.sortBy((e: UserTable) => SortByName.applyDebug(e, sortField, true))
+  "" match {
+    case e if e.equals("" + "")=>
+  }
+
   //等价于
-  val b = UserTable.table.sortBy(e => {
+  val b          = UserTable.table.sortBy(e => {
+
     (sortField match {
       case "id" => if (true)
         e.id.asc
@@ -32,11 +38,13 @@ object SortByNameUsing extends App {
         e.mobile.desc
     }): slick.lifted.Ordered
   })
-  User.table join Address.table sortBy{
-    case(user,address)=>
-      SortByName.applyPrefix(user,true,"") orElse
-      SortByName.applyPrefix(address,true,"address.") apply
+  val prefixName = "aaa."
+  User.table join Address.table sortBy {
+    case (user, address) =>
+      SortByName.applyPrefix(user, true, prefixName) orElse
+        SortByName.applyPrefix(address, true, "address.") apply
         sortField
   }
 
 }
+

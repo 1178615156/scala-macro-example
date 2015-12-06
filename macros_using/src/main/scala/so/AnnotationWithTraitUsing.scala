@@ -15,13 +15,14 @@ package so
     }
 
 
-    @AnnotationWithTrait
     class MyClass[MCT1, MCT2] extends MyTrait[MCT1] with MyTrait2[MCT2]
 
     object AnnotationWithTraitUsing extends App {
       assert(new MyClass[Int, String].x(1)(2) == 1)
       assert(new MyClass[Int, String].t("aaa") == "aaa")
     }
+
+
 
 
 

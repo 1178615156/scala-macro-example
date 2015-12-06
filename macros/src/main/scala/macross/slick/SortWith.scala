@@ -14,7 +14,7 @@ trait SortByName {
   def applyPrefix[EntityTable](entityTable: EntityTable,
                                asc: Boolean, //
                                prefix: String)
-  :PartialFunction [String , slick.lifted.Ordered] =
+  : PartialFunction[String, slick.lifted.Ordered] =
   macro SortByNameImpl.ShowInfo.applyPrefix[EntityTable]
 
   def apply[EntityTable](entityTable: EntityTable,
@@ -29,7 +29,7 @@ trait SortByName {
 object SortByName extends SortByName
 
 trait SortByNameImpl extends macross.base.ShowInfo {
-  val c: Context
+  val c             : Context
   val showInfoSwitch: Boolean
 
   import c.universe._
@@ -38,7 +38,7 @@ trait SortByNameImpl extends macross.base.ShowInfo {
                                                entityTable: c.Expr[EntityTable],
                                                asc: c.Expr[Boolean],
                                                prefix: c.Expr[String])
-  :c.Expr[PartialFunction [String , slick.lifted.Ordered]]= {
+  : c.Expr[PartialFunction[String, slick.lifted.Ordered]] = {
     val et = c.weakTypeOf[EntityTable]
     val etMembers = et.members.filter(_.isPublic)
       .filter(_.isMethod)
@@ -49,19 +49,20 @@ trait SortByNameImpl extends macross.base.ShowInfo {
       .filter(_._1 != "encodeRef")
       .filter(_._1 != "<init>")
 
-
     val nameCaseAsc = etMembers.map {
       case (name, typ) =>
+        val caseName=TermName(c.freshName("slick_sort_by_name"))
         cq"""
-              ${c.eval(prefix) + name.toString} =>{
+              $caseName:String if ($caseName==($prefix+$name)) =>{
                 $entityTable.${name: TermName}.asc
              }
             """
     }
     val nameCaseDesc = etMembers.map {
       case (name, typ) =>
+        val caseName=TermName(c.freshName("slick_sort_by_name"))
         cq"""
-              ${c.eval(prefix) + name.toString} =>{
+              $caseName:String if ($caseName==($prefix+$name)) =>{
                 $entityTable.${name: TermName}.desc
              }
             """
@@ -81,46 +82,16 @@ trait SortByNameImpl extends macross.base.ShowInfo {
         """
     if (showInfoSwitch)
       showInfo(show(rt))
-    c.Expr[PartialFunction[String,slick.lifted.Ordered]](rt)
+    c.Expr[PartialFunction[String, slick.lifted.Ordered]](rt)
   }
 
   def apply[EntityTable: c.WeakTypeTag](
                                          entityTable: c.Expr[EntityTable],
                                          sortField: c.Expr[String],
                                          asc: c.Expr[Boolean]) = {
-    val et = c.weakTypeOf[EntityTable]
-    val etMembers = et.members.filter(_.isPublic)
-      .filter(_.isMethod)
-      .map(_.asMethod)
-      .filter(_.info.resultType <:< typeOf[slick.lifted.Rep[_]])
-      .filter(e ⇒ !(e.info.resultType <:< typeOf[ForeignKeyQuery[_, _]]))
-      .map(e => e.name.toString -> e.info.resultType)
-      .filter(_._1 != "encodeRef")
-      .filter(_._1 != "<init>")
-
-    val nameCase = etMembers.map {
-      case (name, typ) =>
-        cq"""
-              ${name.toString} =>{
-              if ($asc)
-                $entityTable.${name: TermName}.asc
-              else
-                $entityTable.${name: TermName}.desc
-             }
-            """
-    }
-    val rt =
-      q"""
-          {
-        ($sortField match {
-        case ..$nameCase
-        }):slick.lifted.Ordered
-
-        }
-        """
-    if (showInfoSwitch)
-      showInfo(show(rt))
-    rt
+    q"""
+      ${applyPrefix(entityTable, asc, c.Expr[String]( q""" "" """))}($sortField)
+      """
   }
 }
 
