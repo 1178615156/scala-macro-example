@@ -4,8 +4,7 @@ import Keys._
 object BuildSettings {
 
 
-  val nexus_ip = "192.168.1.200"
-  val nexus_url = s"http://$nexus_ip:8081/nexus/"
+
   val paradiseVersion = "2.1.0-M5"
 
   val macroSetting = Seq(
@@ -18,6 +17,8 @@ object BuildSettings {
       )
   )
 
+  val nexus_ip = "192.168.1.200"
+  val nexus_url = s"http://$nexus_ip:8081/nexus/"
   val resolversSetting: Seq[Def.Setting[Seq[Resolver]]] = Seq(
 //    resolvers += "Nexus" at nexus_url + "content/groups/public",
 //    resolvers += Resolver.url("Edulify Repository", url(s"http://$nexus_ip:8081/nexus/content/groups/public"))(Resolver.ivyStylePatterns)
