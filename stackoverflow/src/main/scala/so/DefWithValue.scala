@@ -29,10 +29,16 @@ class DefWithValueImpl(val c: Context) extends macross.base.ShowInfo {
 
     val out = annottees.head.tree match {
       case q"def $name (...$param):$resultType = {..$body}" ⇒ {
+        val bodys = body: List[Tree]
+        val outBodys =
+          bodys.collect {
+            case q"val waitReplace = $body" ⇒ q""" val  waitReplace = "world" """
+            case e⇒e
+          }
         q"""
             def $name (...$param):$resultType = {
             val ddd=1
-              ..$body
+              ..$outBodys
             }
             """
       }

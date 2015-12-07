@@ -9,7 +9,12 @@ object DefWithValueUsing extends App {
   @DefWithValue
   def n: Unit = {
 
-    val a = ddd
-  }
 
+    val waitReplace = "hello"
+    val a = ddd
+
+    println(waitReplace)
+    assert(waitReplace=="world")
+  }
+n
 }
