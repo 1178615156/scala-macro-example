@@ -23,7 +23,12 @@ object BuildProject extends Build {
     buildSettings ++ unPublish ++ slickDepend) dependsOn macros dependsOn macros_try dependsOn stackoverflow
 
   lazy val `scala-macro-example` = Project("scala-macro-example", file("."), settings =
-    buildSettings ++ unPublish).aggregate(macros, using, macros_try, stackoverflow)
+    buildSettings ++ unPublish ++Seq(
+    libraryDependencies += "org.cometd.java" % "cometd-java-oort" % "3.0.7",
+      libraryDependencies += "com.cedarsoft.commons" % "app" % "7.1.0"
+  ,libraryDependencies += "biz.hochguertel.javaeetutorial.jaxrs" % "hello" % "1.4"
+    )
+  ).aggregate(macros, using, macros_try, stackoverflow)
 }
 
 

@@ -5,6 +5,6 @@ package macross
   */
 class ControlMacroLogTestUsing {
   ControlMacroLogTest.apply
-  ControlMacroLogTest.apply(ControlMacroLog.notShowInfo)
+  ControlMacroLogTest.apply(ControlMacroLog.default)
 
 }
