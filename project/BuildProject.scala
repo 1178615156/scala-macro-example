@@ -26,10 +26,11 @@ object BuildProject extends Build {
     buildSettings ++ unPublish ++ Seq()
   )
     .dependsOn(
-      macros,
-      using % "compile->test",
-      macros_try % "compile->test",
-      stackoverflow % "compile->test")
+      macros
+    )
+//      using % "compile->test",
+//      macros_try % "compile->test",
+//      stackoverflow % "compile->test")
     .aggregate(macros /*, using, macros_try, stackoverflow*/)
 }
 
