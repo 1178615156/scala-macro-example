@@ -56,22 +56,6 @@ class GetPublicValMacrosImpl(val c: Context) {
           .toList.reverse
         //why need reverse
         //you guess
-        /**
-         * object TT{
-         * val a=1
-         * val b=2
-         * val c=3
-         *
-         * when use macro
-         * val list:List[Int]=GetPublicValMacros.apply[TT,Int]
-         * then Equivalent to
-         *
-         * if no reverse then
-         * val list=List(c,b,a) -- run stack is put a,b,c --pop c,b,a
-         *
-         * if has then
-         * val list=List(a,b,c)
-         */
       }).asInstanceOf[List[$rt]].filter(_!=null)
     """
     )
