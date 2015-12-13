@@ -1,5 +1,7 @@
 package macross.play
 
+import macross.base.ConfFolder
+
 import scala.annotation.StaticAnnotation
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
@@ -11,33 +13,26 @@ import java.io.{File, PrintWriter}
   */
 class MakeRoutes(path: String) extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro MakeRoutesImpl.apply
-
 }
 
-class MakeRoutesImpl(val c: Context) {
+
+
+class MakeRoutesImpl(val c: Context) extends ConfFolder{
   def showInfo(s: String) =
     c.info(c.enclosingPosition, s.split("\n").mkString("\n |---macro info---\n |", "\n |", ""), true)
 
-  val DefaultOutputDir  = "conf"
-  val OutputDirSettings = "conf.output.dir="
-
-  lazy val outputDir = {
-    val f = new File(c.settings
-      .find(_.startsWith(OutputDirSettings))
-      .map(_.substring(OutputDirSettings.length))
-      .getOrElse(DefaultOutputDir))
-
-    if (!f.exists()) f.mkdirs()
-    f
-  }
   val routesFile = {
-    val of = outputDir.listFiles().filter(e ⇒ e.getName == ("routes") || e.getName.contains(".Routes"))
+    config.getAnyRef("application.route",)
+    val of = Play.confOutputDir.listFiles().filter(e ⇒ e.getName == ("routes") || e.getName.contains(".Routes"))
     if (of.length < 1)
-      c.abort(c.enclosingPosition, s"not find routes file in ${outputDir.getAbsolutePath}")
+      c.abort(c.enclosingPosition, s"not find routes file in ${Play.confOutputDir.getAbsolutePath}")
     else if (of.length > 1)
       c.abort(c.enclosingPosition, s"routes file too many ${of.map(_.getAbsolutePath)}")
     else
       of.head
+  }
+  val appConfFile = {
+    Play.confOutputDir.listFiles().filter(_.getName=="")
   }
 
   def apply(annottees: c.Expr[Any]*): c.Expr[Any] = {
@@ -59,51 +54,57 @@ class MakeRoutesImpl(val c: Context) {
           ))
       .filter(_._2.nonEmpty)
 
-    case class RouteLines(HttpMethod: String, url: String, codeMethod: String) {
+    case class RouteLines(HttpMethod: String, url: String, codeMethod: String, params: String = "") {
+      override def toString = HttpMethod + url + codeMethod
     }
 
     val codeRouteLines = clazzMembers.flatMap {
-      case (method, annotations: List[c.universe.Annotation]) ⇒
+      case (method: c.universe.Symbol, annotations: List[c.universe.Annotation]) ⇒
         annotations.map(_.tree).map {
+
           case q"new ${annotation}(url = $url )" if annotation.tpe <:< typeOf[Get] ⇒
-            RouteLines("GET", path + url.toString.tail.reverse.tail.reverse, method.fullName)
-          case q"new ${annotation}(url = $url )" if annotation.tpe <:< typeOf[Post] ⇒ url
-            RouteLines("POST", path + url, method.fullName)
+            RouteLines(
+              "GET",
+              path + url.toString.tail.reverse.tail.reverse, method.fullName,
+              if (method.asMethod.paramLists.isEmpty)
+                ""
+              else method.asMethod.paramLists.map(_.map(e => e.name.toString + ":" + e.info).mkString("(", ",", ")")).mkString
+            )
+          //          case q"new ${annotation}(url = $url )" if annotation.tpe <:< typeOf[Post] ⇒
+          //            RouteLines("POST", path + url.toString.tail.reverse.tail.reverse, method.fullName,
+          //              if (method.asMethod.paramLists.isEmpty)
+          //                ""
+          //              else method.asMethod.paramLists.map(_.map(e => e.name.toString + ":" + e.info).mkString("(", ",", ")")).mkString
+          //            )
         }
     }
     //    showInfo(show(codeRouteLines))
 
     val routes = scala.io.Source.fromFile(routesFile).getLines()
-    val asRequestUrl = "(.+) + ([a-z|A-Z|/|*]+) +([a-z|A-Z|.]+.*)".r
+    val asRequestUrl = "(.+) + ([a-z|A-Z|/|*]+) +([a-z|A-Z|\\\\.|0-9]+).*".r
     val fileRoutesLines = routes.collect {
-      case asRequestUrl(a, b, c) ⇒ RouteLines(a, b, c)
+      case asRequestUrl(a, b, c) ⇒ RouteLines(a.trim, b.trim, c.trim)
     }
     val zero = fileRoutesLines.map(x ⇒ x.toString → x).toList.toMap
-    val out = codeRouteLines.foldLeft(zero) { (l, r) ⇒
-      l.+(r.toString → r)
-    }
-    //    showInfo(show(out.keys.size))
-    //    showInfo(show(zero.keys.size))
-    zero.toList.sortBy(_._2.url).map(_._1) zip
-      out.toList.sortBy(_._2.url).map(_._1) forall (e ⇒ e._1 == e._2)
+    val out = codeRouteLines
+      .foldLeft(zero) { (l, r) ⇒
+        l.+(r.toString → r)
+      }
 
-    val hasChange = !(
-      out.size == zero.size &&
-        zero.toList.sortBy(_._2.url).map(_._1).zip
-        (out.toList.sortBy(_._2.url).map(_._1)).forall(e ⇒ e._1 == e._2)
-      //        out.keys.toList.sorted.zip(zero.keys.toList.sorted).forall(e ⇒ e._1 == e._2)
-      )
-    //    showInfo(show(fileRoutesLines.mkString))
-    //    showInfo(show(routes mkString("")))
-    //    showInfo(show(out.values))
+    val hasChange =
+      true
+    //      !(
+    //      out.size == zero.size &&
+    //        zero.toList.sortBy(_._2.url).map(_._1).zip
+    //        (out.toList.sortBy(_._2.url).map(_._1)).forall(e ⇒ e._1 == e._2)
+    //      )
+
     if (hasChange) {
-      val outRoutesFile = new PrintWriter(
-        routesFile
-        //        (new File(outputDir, "routes_test"))
-      )
+      val outRoutesFile = new PrintWriter(routesFile)
+
       val fileTxt =
         out.values.toList.sortBy(_.url).map(x ⇒ {
-          s"${x.HttpMethod}  ${x.url}  ${x.codeMethod}"
+          s"${x.HttpMethod}  ${x.url}  ${x.codeMethod}${x.params}"
         }).mkString("\n")
       outRoutesFile.print(
         fileTxt
