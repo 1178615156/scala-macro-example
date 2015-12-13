@@ -17,7 +17,7 @@ import yjs.annotation.Routes._
 import macross.play.MakeRoutes
 ```
 use like this
-![use like this](http://chuantu.biz/t2/22/1449918277x-1376440150.gif)
+![use like this](http://www.popo8.com/host/data/201512/13/11/8e2a82d.gif)
 
 #### auto type tran
 ```scala
