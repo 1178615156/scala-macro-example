@@ -15,14 +15,13 @@ class MakeRoutes(path: String) extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro MakeRoutesImpl.apply
 }
 
-
-
-class MakeRoutesImpl(val c: Context) extends ConfFolder{
-  def showInfo(s: String) =
-    c.info(c.enclosingPosition, s.split("\n").mkString("\n |---macro info---\n |", "\n |", ""), true)
+class MakeRoutesImpl(val c: Context)
+  extends ConfFolder
+  with macross.base.ShowInfo
+  with macross.annotation.base.AnnotationParam {
 
   val routesFile = {
-    config.getAnyRef("application.route",)
+    //    config.getString("application.route")
     val of = Play.confOutputDir.listFiles().filter(e ⇒ e.getName == ("routes") || e.getName.contains(".Routes"))
     if (of.length < 1)
       c.abort(c.enclosingPosition, s"not find routes file in ${Play.confOutputDir.getAbsolutePath}")
@@ -31,19 +30,19 @@ class MakeRoutesImpl(val c: Context) extends ConfFolder{
     else
       of.head
   }
+
   val appConfFile = {
-    Play.confOutputDir.listFiles().filter(_.getName=="")
+    Play.confOutputDir.listFiles().filter(_.getName == "")
   }
 
   def apply(annottees: c.Expr[Any]*): c.Expr[Any] = {
     import c.universe._
 
-    val path = c.macroApplication match {
-      case q"new $annotation (path=${Literal(Constant(path: String))}).$func(..$annottess)" ⇒
-        path
-      case q"new $annotation (${Literal(Constant(path: String))}).$func(..$annottess)" ⇒
-        path
-    }
+    val path = annotationParams.head.collect {
+      case q"${Literal(Constant(path: String))}" ⇒ path
+      case q"path=${Literal(Constant(path: String))}" ⇒ path
+    }.head
+
     val clazz = c.typecheck(annottees.head.tree).symbol
     val clazzMembers = clazz.typeSignature.members
       .filter(e ⇒ e.annotations.nonEmpty)
@@ -55,40 +54,43 @@ class MakeRoutesImpl(val c: Context) extends ConfFolder{
       .filter(_._2.nonEmpty)
 
     case class RouteLines(HttpMethod: String, url: String, codeMethod: String, params: String = "") {
-      override def toString = HttpMethod + url + codeMethod
+      def id = HttpMethod + url + codeMethod
     }
 
     val codeRouteLines = clazzMembers.flatMap {
       case (method: c.universe.Symbol, annotations: List[c.universe.Annotation]) ⇒
         annotations.map(_.tree).map {
-
           case q"new ${annotation}(url = $url )" if annotation.tpe <:< typeOf[Get] ⇒
+            val httpMethod = annotation.tpe match {
+              case e if e <:< typeOf[Get] ⇒ "GET"
+              case e if e <:< typeOf[Post] ⇒ "POST"
+            }
             RouteLines(
-              "GET",
+              httpMethod,
               path + url.toString.tail.reverse.tail.reverse, method.fullName,
               if (method.asMethod.paramLists.isEmpty)
                 ""
               else method.asMethod.paramLists.map(_.map(e => e.name.toString + ":" + e.info).mkString("(", ",", ")")).mkString
             )
-          //          case q"new ${annotation}(url = $url )" if annotation.tpe <:< typeOf[Post] ⇒
-          //            RouteLines("POST", path + url.toString.tail.reverse.tail.reverse, method.fullName,
-          //              if (method.asMethod.paramLists.isEmpty)
-          //                ""
-          //              else method.asMethod.paramLists.map(_.map(e => e.name.toString + ":" + e.info).mkString("(", ",", ")")).mkString
-          //            )
         }
-    }
-    //    showInfo(show(codeRouteLines))
+    }.toSeq
 
     val routes = scala.io.Source.fromFile(routesFile).getLines()
-    val asRequestUrl = "(.+) + ([a-z|A-Z|/|*]+) +([a-z|A-Z|\\\\.|0-9]+).*".r
-    val fileRoutesLines = routes.collect {
-      case asRequestUrl(a, b, c) ⇒ RouteLines(a.trim, b.trim, c.trim)
+    val fileRoutesLines = {
+      val asRequestUrl = "(.+) + ([a-z|A-Z|/|*]+) +([a-z|A-Z|\\\\.|0-9]+).*".r
+      routes.collect {
+        case asRequestUrl(a, b, c) ⇒ RouteLines(a.trim, b.trim, c.trim)
+      }
     }
-    val zero = fileRoutesLines.map(x ⇒ x.toString → x).toList.toMap
+    val zero =
+    //      fileRoutesLines.map(x ⇒ x.id  → x).toList.toMap
+      fileRoutesLines
+        .filterNot(e ⇒ codeRouteLines.exists(_.url == e.url))
+        .filterNot(e ⇒ codeRouteLines.exists(_.codeMethod == e.codeMethod))
+        .map(e ⇒ e.id → e).toMap
     val out = codeRouteLines
       .foldLeft(zero) { (l, r) ⇒
-        l.+(r.toString → r)
+        l.+(r.id → r)
       }
 
     val hasChange =
