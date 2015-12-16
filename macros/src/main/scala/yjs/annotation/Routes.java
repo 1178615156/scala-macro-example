@@ -20,4 +20,16 @@ public class Routes {
     public @interface Get {
         public String url();
     }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    public @interface Delete {
+        public String url();
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    public @interface Put {
+        public String url();
+    }
 }
