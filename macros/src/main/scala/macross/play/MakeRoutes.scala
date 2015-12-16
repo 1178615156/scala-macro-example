@@ -22,7 +22,7 @@ class MakeRoutesImpl(val c: Context)
   with ShowInfo
   with AnnotationParam {
 
-  case class RouteLine(HttpMethod: String, url: String, codeMethod: String, params: String = "") {
+  private[this] case class RouteLine(HttpMethod: String, url: String, codeMethod: String, params: String = "") {
     def id = HttpMethod + url + codeMethod
   }
 
@@ -40,7 +40,6 @@ class MakeRoutesImpl(val c: Context)
   }
 
   private[this] def controllerRouteLines(controller: Symbol, path: String): Seq[RouteLine] = {
-    //    val controller: c.universe.Symbol = c.typecheck(annottees.head.tree).symbol
     val controllerMethod = controller.typeSignature.members
       .filter(e ⇒ e.annotations.nonEmpty)
       .map(e ⇒
@@ -86,6 +85,7 @@ class MakeRoutesImpl(val c: Context)
   }
 
   def apply(annottees: c.Expr[Any]*): c.Expr[Any] = {
+    val asDebug = false
     // get make routes path property
     val path = annotationParams.head.collect {
       case q"${Literal(Constant(path: String))}" ⇒ path
@@ -104,12 +104,9 @@ class MakeRoutesImpl(val c: Context)
 
     val out = fileRoutesMap ++ controllerRouteLines.map(e ⇒ e.id → e).toMap
 
-    val hasChange =
-      !out.toList.map(_._2).forall(e ⇒ fileRouteLines.contains(e))
-    //      !(fileRouteLines.sortBy(e ⇒ e.codeMethod + e.HttpMethod + e.params + e.url) ==
-    //        out.toList.map(_._2).sortBy(e ⇒ e.codeMethod + e.HttpMethod + e.params + e.url))
+    val hasChange = !out.toList.map(_._2).forall(e ⇒ fileRouteLines.contains(e))
 
-    if (false)
+    if (asDebug)
       showInfo(
         s"""
            |file      : ${fileRouteLines}
@@ -117,10 +114,10 @@ class MakeRoutesImpl(val c: Context)
            |hasChange : $hasChange
        """.stripMargin)
     if (hasChange) {
-
+      val maxUrlSize = out.values.toList.map(_.url.size).max
       val fileTxt =
         out.values.toList.sortBy(_.url).map(x ⇒ {
-          s"${x.HttpMethod}  ${x.url}  ${x.codeMethod}${x.params}"
+          s"${x.HttpMethod}${" " * (6 - x.HttpMethod.size)}${x.url}${" " * (maxUrlSize - x.url.size + 2)}${x.codeMethod}${x.params}"
         }).mkString("\n")
       val outRoutesFile = new PrintWriter(routesFile)
       outRoutesFile.print(fileTxt)
