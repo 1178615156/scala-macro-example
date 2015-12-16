@@ -8,7 +8,7 @@ import java.io.PrintWriter
 
 import macross.annotation.base.AnnotationParam
 import macross.base.{ConfFolder, ShowInfo}
-import yjs.annotation.Routes.{Get, Post}
+import yjs.annotation.Routes.{Delete, Put, Get, Post}
 
 /**
   * Created by yu jie shui on 2015/12/11 15:25.
@@ -45,7 +45,10 @@ class MakeRoutesImpl(val c: Context)
       .map(e ⇒
         (e, e.annotations.filter(e ⇒
           e.tree.tpe <:< typeOf[Get] ||
-            e.tree.tpe <:< typeOf[Post])
+            e.tree.tpe <:< typeOf[Post] ||
+            e.tree.tpe <:< typeOf[Put] ||
+            e.tree.tpe <:< typeOf[Delete]
+        )
           ))
       .filter(_._2.nonEmpty)
 
@@ -56,6 +59,9 @@ class MakeRoutesImpl(val c: Context)
             val httpMethod = annotation.tpe match {
               case e if e <:< typeOf[Get] ⇒ "GET"
               case e if e <:< typeOf[Post] ⇒ "POST"
+              case e if e <:< typeOf[Put] ⇒ "PUT"
+              case e if e <:< typeOf[Delete] ⇒ "DELETE"
+
             }
             RouteLine(
               HttpMethod = httpMethod,
@@ -74,8 +80,8 @@ class MakeRoutesImpl(val c: Context)
   private[this] def fileRoutesLines(controller: Symbol, path: String): Seq[RouteLine] = {
     val routes = scala.io.Source.fromFile(routesFile).getLines()
     val fileRoutes: Seq[RouteLine] = {
-      val asRequestUrl = "(GET|POST|->) +([a-z|A-Z|/|0-9]+) +([a-z|A-Z|.|0-9]+)".r
-      val asRequestUrlWithParams = "(GET|POST|->) +([a-z|A-Z|/|0-9]+) +([a-z|A-Z|.|0-9]+) ?(\\(.*\\))".r
+      val asRequestUrl = "(GET|POST|DELETE|PUT|->) +([a-z|A-Z|/|0-9]+) +([a-z|A-Z|.|0-9]+)".r
+      val asRequestUrlWithParams = "(GET|POST|DELETE|PUT|->) +([a-z|A-Z|/|0-9]+) +([a-z|A-Z|.|0-9]+) ?(\\(.*\\))".r
       routes.collect {
         case asRequestUrlWithParams(a, b, c, d) ⇒ RouteLine(a.trim, b.trim, c.trim, d.trim)
         case asRequestUrl(a, b, c) ⇒ RouteLine(a.trim, b.trim, c.trim)
@@ -86,6 +92,7 @@ class MakeRoutesImpl(val c: Context)
 
   def apply(annottees: c.Expr[Any]*): c.Expr[Any] = {
     val asDebug = false
+//    val asDebug = true
     // get make routes path property
     val path = annotationParams.head.collect {
       case q"${Literal(Constant(path: String))}" ⇒ path
