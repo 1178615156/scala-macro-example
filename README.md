@@ -1,7 +1,16 @@
 # scala-macro-example
 
 macros is macro impl
+
 macros_using is example
+
+ add the following to your build 
+```scala 
+  lazy val `scala-macro-example` =
+    ProjectRef( uri("git:https://github.com/1178615156/scala-macro-example"),"scala-macro-example")
+  //lazy val `your project` = Project(...).dependsOn(`scala-macro-example`)
+```
+
 ```
 play url annotation     make routes from annotation 
 tran                    auto type tran
