@@ -31,9 +31,6 @@ class MakeRoutesImpl(val c: Context)
       of.head
   }
 
-  val appConfFile = {
-    Play.confOutputDir.listFiles().filter(_.getName == "")
-  }
 
   def apply(annottees: c.Expr[Any]*): c.Expr[Any] = {
     import c.universe._
@@ -60,17 +57,19 @@ class MakeRoutesImpl(val c: Context)
     val codeRouteLines = clazzMembers.flatMap {
       case (method: c.universe.Symbol, annotations: List[c.universe.Annotation]) ⇒
         annotations.map(_.tree).map {
-          case q"new ${annotation}(url = $url )" if annotation.tpe <:< typeOf[Get] ⇒
+          case q"new ${annotation}(url = ${Literal(Constant(url: String))} )" ⇒
             val httpMethod = annotation.tpe match {
               case e if e <:< typeOf[Get] ⇒ "GET"
               case e if e <:< typeOf[Post] ⇒ "POST"
             }
             RouteLines(
-              httpMethod,
-              path + url.toString.tail.reverse.tail.reverse, method.fullName,
-              if (method.asMethod.paramLists.isEmpty)
-                ""
-              else method.asMethod.paramLists.map(_.map(e => e.name.toString + ":" + e.info).mkString("(", ",", ")")).mkString
+              HttpMethod = httpMethod,
+              url = path + url, codeMethod = method.fullName,
+              params =
+                if (method.asMethod.paramLists.isEmpty)
+                  ""
+                else
+                  method.asMethod.paramLists.map(_.map(e => e.name.toString + ":" + e.info).mkString("(", ",", ")")).mkString
             )
         }
     }.toSeq
@@ -83,7 +82,6 @@ class MakeRoutesImpl(val c: Context)
       }
     }
     val zero =
-    //      fileRoutesLines.map(x ⇒ x.id  → x).toList.toMap
       fileRoutesLines
         .filterNot(e ⇒ codeRouteLines.exists(_.url == e.url))
         .filterNot(e ⇒ codeRouteLines.exists(_.codeMethod == e.codeMethod))
