@@ -17,21 +17,21 @@ trait SortByName {
   def applyPrefix[EntityTable](entityTable: EntityTable,
                                asc: Boolean, //
                                prefix: String)(
-                                implicit controlMacroLog: ControlMacroLog
+                                implicit controlMacroLog: ControlMacroLog.Value
                               )
   : PartialFunction[String, slick.lifted.Ordered] = macro SortByNameImpl.applyPrefix[EntityTable]
 
   def apply[EntityTable](entityTable: EntityTable,
                          sortField: String,
                          asc: Boolean)
-                        (implicit controlMacroLog: ControlMacroLog)
+                        (implicit controlMacroLog: ControlMacroLog.Value)
   : slick.lifted.Ordered = macro SortByNameImpl.apply[EntityTable]
 
   @deprecated
   def applyDebug[EntityTable](entityTable: EntityTable,
                               sortField: String,
                               asc: Boolean)
-                             (implicit controlMacroLog: ControlMacroLog)
+                             (implicit controlMacroLog: ControlMacroLog.Value)
   : slick.lifted.Ordered = macro SortByNameImpl.apply[EntityTable]
 }
 
@@ -48,7 +48,7 @@ class SortByNameImpl(val c: Context)
                                                entityTable: c.Expr[EntityTable],
                                                asc: c.Expr[Boolean],
                                                prefix: c.Expr[String])
-                                             (controlMacroLog: c.Expr[ControlMacroLog])
+                                             (controlMacroLog: c.Expr[ControlMacroLog.Value])
   : c.Expr[PartialFunction[String, slick.lifted.Ordered]] = {
     val etMembers = tableRepValue[EntityTable]
       .map(e => e.name.toString -> e.info.resultType)
@@ -93,7 +93,7 @@ class SortByNameImpl(val c: Context)
                                          entityTable: c.Expr[EntityTable],
                                          sortField: c.Expr[String],
                                          asc: c.Expr[Boolean])(
-                                         controlMacroLog: c.Expr[ControlMacroLog]
+                                         controlMacroLog: c.Expr[ControlMacroLog.Value]
                                        ) = {
     q"""
       ${applyPrefix(entityTable, asc, c.Expr[String]( q""" "" """))(controlMacroLog)}($sortField)

@@ -67,9 +67,6 @@ class MakeRoutesImpl(val c: Context)
               HttpMethod = httpMethod,
               url = path + url, codeMethod = method.fullName,
               params =
-                if (method.asMethod.paramLists.isEmpty)
-                  ""
-                else
                   method.asMethod.paramLists.map(_.map(e => e.name.toString + ":" + e.info).mkString("(", ",", ")")).mkString
             )
         }
@@ -126,6 +123,7 @@ class MakeRoutesImpl(val c: Context)
         out.values.toList.sortBy(_.url).map(x ⇒ {
           s"${x.HttpMethod}${" " * (8 - x.HttpMethod.size)}${x.url}${" " * (maxUrlSize - x.url.size + 2)}${x.codeMethod}${x.params}"
         }).mkString("\n")
+
       val outRoutesFile = new PrintWriter(routesFile)
       outRoutesFile.print(fileTxt)
       outRoutesFile.close()

@@ -9,17 +9,20 @@ import scala.reflect.macros.blackbox.Context
 /**
   * Created by yjs on 2015/12/6.
   */
-sealed trait ControlMacroLog
 
+trait ControlMacroLog {
 
-object ControlMacroLog {
+  trait Value
 
-  trait NeedShow extends ControlMacroLog
+  trait NeedShow extends Value
 
-  trait unNeedShow extends ControlMacroLog
+  trait UnNeedShow extends Value
 
-  implicit
-  object default extends unNeedShow
+}
+
+object ControlMacroLog extends ControlMacroLog {
+
+  implicit object default extends NeedShow
 
 }
 
@@ -28,7 +31,7 @@ trait ControlMacroLogMacro {
 
   import c.universe._
 
-  implicit class WithAsShowInfo(controlMacroLog: c.Expr[ControlMacroLog]) {
+  implicit class WithAsShowInfo2(controlMacroLog: c.Expr[ControlMacroLog.Value]) {
     def needShow =
       controlMacroLog.tree.symbol.asTerm.info <:< typeOf[ControlMacroLog.NeedShow]
 
@@ -36,13 +39,15 @@ trait ControlMacroLogMacro {
 
 }
 
+
 private[macross] object ControlMacroLogTest {
-  def apply(implicit controlMacroLog: ControlMacroLog): Any = macro Impl.apply
+  def apply(implicit controlMacroLog: ControlMacroLog.Value): Any = macro Impl.apply
 
   class Impl(val c: blackbox.Context) extends ShowInfo with ControlMacroLogMacro {
-    def apply(controlMacroLog: c.Expr[ControlMacroLog]) = {
+    def apply(controlMacroLog: c.Expr[ControlMacroLog.Value]) = {
       import c.universe._
 
+      showInfo(show(controlMacroLog.needShow))
       if (controlMacroLog.needShow)
         showInfo("hello ssss")
       q"1"

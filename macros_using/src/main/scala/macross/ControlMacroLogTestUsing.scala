@@ -7,4 +7,6 @@ class ControlMacroLogTestUsing {
   ControlMacroLogTest.apply
   ControlMacroLogTest.apply(ControlMacroLog.default)
 
+
+
 }
