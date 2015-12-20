@@ -67,7 +67,7 @@ class MakeRoutesImpl(val c: Context)
               HttpMethod = httpMethod,
               url = path + url, codeMethod = method.fullName,
               params =
-                  method.asMethod.paramLists.map(_.map(e => e.name.toString + ":" + e.info).mkString("(", ",", ")")).mkString
+                method.asMethod.paramLists.map(_.map(e => e.name.toString + ":" + e.info).mkString("(", ",", ")")).mkString
             )
         }
     }.toList
@@ -75,21 +75,20 @@ class MakeRoutesImpl(val c: Context)
   }
 
   private[this] def fileRoutesLines(controller: Symbol, path: String): Seq[RouteLine] = {
+    val asRequestUrl = "(GET|POST|DELETE|PUT|->) +([a-z|A-Z|/|0-9]+) +([a-z|A-Z|.|0-9]+)".r
+    val asRequestUrlWithParams = "(GET|POST|DELETE|PUT|->) +([a-z|A-Z|/|0-9]+) +([a-z|A-Z|.|0-9]+) ?(\\(.*\\))".r
+
     val routes = scala.io.Source.fromFile(routesFile).getLines()
-    val fileRoutes: Seq[RouteLine] = {
-      val asRequestUrl = "(GET|POST|DELETE|PUT|->) +([a-z|A-Z|/|0-9]+) +([a-z|A-Z|.|0-9]+)".r
-      val asRequestUrlWithParams = "(GET|POST|DELETE|PUT|->) +([a-z|A-Z|/|0-9]+) +([a-z|A-Z|.|0-9]+) ?(\\(.*\\))".r
-      routes.collect {
-        case asRequestUrlWithParams(a, b, c, d) ⇒ RouteLine(a.trim, b.trim, c.trim, d.trim)
-        case asRequestUrl(a, b, c) ⇒ RouteLine(a.trim, b.trim, c.trim)
-      }.toList
-    }
+    val fileRoutes: Seq[RouteLine] = routes.collect {
+      case asRequestUrlWithParams(a, b, c, d) ⇒ RouteLine(a.trim, b.trim, c.trim, d.trim)
+      case asRequestUrl(a, b, c) ⇒ RouteLine(a.trim, b.trim, c.trim)
+    }.toList
     fileRoutes
   }
 
   def apply(annottees: c.Expr[Any]*): c.Expr[Any] = {
     val asDebug = false
-//    val asDebug = true
+    //    val asDebug = true
     // get make routes path property
     val path = annotationParams.head.collect {
       case q"${Literal(Constant(path: String))}" ⇒ path
