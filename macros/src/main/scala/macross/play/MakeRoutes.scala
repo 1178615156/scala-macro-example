@@ -4,11 +4,10 @@ import scala.annotation.StaticAnnotation
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 
-import java.io.PrintWriter
+import java.io.{File, PrintWriter}
 
 import macross.annotation.base.AnnotationParam
 import macross.base.{ConfFolder, ShowInfo}
-import yjs.annotation.Routes
 import yjs.annotation.Routes.{Delete, Get, Post, Put}
 
 /**
@@ -19,9 +18,14 @@ class MakeRoutes(path: String) extends StaticAnnotation {
 }
 
 object MakeRoutes {
-  def folderPath[T](folder: String, path: String): Unit = macro MakeRoutesImpl.makeRoutesMethodWithFolder[T]
 
-  def path[T](path: String): Unit = macro MakeRoutesImpl.makeRoutesMethod[T]
+  trait RoutesFilePath
+
+  def routesFilePath[T](path: String)(implicit routesFilePath: MakeRoutes.RoutesFilePath): Unit =
+  macro MakeRoutesImpl.routesFilePathImpl[T]
+
+  def apply[T](path: String): Unit =
+  macro MakeRoutesImpl.pathImpl[T]
 }
 
 class MakeRoutesImpl(val c: Context)
@@ -35,9 +39,9 @@ class MakeRoutesImpl(val c: Context)
 
   import c.universe._
 
-  private[this] lazy val routesFile = {
+  private[this] def defaultRoutesFile: File = {
     //    config.getString("application.route")
-    val of = Play.confOutputDir.listFiles().filter(e ⇒ e.getName == ("routes") || e.getName.contains(".Routes"))
+    val of = Play.confOutputDir.listFiles().filter(e ⇒ e.getName == ("routes") || e.getName.contains(".routes"))
     if (of.length < 1)
       c.abort(c.enclosingPosition, s"not find routes file in ${Play.confOutputDir.getAbsolutePath}")
     else if (of.length > 1)
@@ -71,11 +75,12 @@ class MakeRoutesImpl(val c: Context)
             case e if e <:< typeOf[Post] ⇒ "POST"
             case e if e <:< typeOf[Put] ⇒ "PUT"
             case e if e <:< typeOf[Delete] ⇒ "DELETE"
-
           }
           RouteLine(
             HttpMethod = httpMethod,
-            url = path + url, codeMethod = s"${controller.fullName}.${method.name}",
+            url = path + url,
+            codeMethod =
+              s"${if (controller.isModule || controller.isModuleClass) "" else "@"}${controller.fullName}.${method.name}",
             params =
               method.asMethod.paramLists.map(_.map(e => e.name.toString + ":" + e.info).mkString("(", ",", ")")).mkString
           )
@@ -84,7 +89,7 @@ class MakeRoutesImpl(val c: Context)
     controllerRouteLines
   }
 
-  private[this] def fileRoutesLines: Seq[RouteLine] = {
+  private[this] def fileRoutesLines(routesFile: File): Seq[RouteLine] = {
     val asRequestUrl =
       "(GET|POST|DELETE|PUT|->) +([a-z|A-Z|/|0-9|_]+) +(@|[a-z|A-Z|.|0-9|_]+)".r
     val asRequestUrlWithParams =
@@ -99,11 +104,9 @@ class MakeRoutesImpl(val c: Context)
   }
 
 
-  private def impl(controller: Symbol, path: String) = {
+  private def impl(controller: Symbol, path: String, routesFile: Option[File] = None) = {
     val controllerRouteLines: Seq[RouteLine] = this.controllerRouteLines(controller, path)
-
-    val fileRouteLines: Seq[RouteLine] = this.fileRoutesLines
-    //    showInfo(""+show(fileRouteLines))
+    val fileRouteLines: Seq[RouteLine] = this.fileRoutesLines(routesFile.getOrElse(this.defaultRoutesFile))
     val fileRoutesMap = fileRouteLines
       .filterNot(e ⇒ controllerRouteLines.exists(_.url == e.url))
       .filterNot(e ⇒ controllerRouteLines.exists(_.codeMethod == e.codeMethod))
@@ -114,7 +117,6 @@ class MakeRoutesImpl(val c: Context)
     val hasChange = !out.toList.map(_._2).forall(e ⇒ fileRouteLines.contains(e))
 
     val asDebug = false
-    //    val asDebug = true
     if (asDebug) {
       showInfo(
         s"""
@@ -130,7 +132,7 @@ class MakeRoutesImpl(val c: Context)
           s"${x.HttpMethod}${" " * (8 - x.HttpMethod.size)}${x.url}${" " * (maxUrlSize - x.url.size + 2)}${x.codeMethod}${x.params}"
         }).mkString("\n")
 
-      val outRoutesFile = new PrintWriter(routesFile)
+      val outRoutesFile = new PrintWriter(routesFile.getOrElse(this.defaultRoutesFile))
       outRoutesFile.print(fileTxt)
       outRoutesFile.close()
 
@@ -154,7 +156,7 @@ class MakeRoutesImpl(val c: Context)
     c.Expr(q"{..${annottees}}")
   }
 
-  def makeRoutesMethod[T: c.WeakTypeTag](path: c.Expr[String]) = {
+  def pathImpl[T: c.WeakTypeTag](path: c.Expr[String]) = {
     val controller: c.universe.Symbol = c.weakTypeOf[T].typeSymbol
     impl(controller, c.eval(path))
     q"""
@@ -162,9 +164,15 @@ class MakeRoutesImpl(val c: Context)
       """
   }
 
-  def makeRoutesMethodWithFolder[T: c.WeakTypeTag](folder: c.Expr[String], path: c.Expr[String]) = {
+  def routesFilePathImpl[T: c.WeakTypeTag](path: c.Expr[String])(routesFilePath: c.Expr[MakeRoutes.RoutesFilePath]) = {
     val controller: c.universe.Symbol = c.weakTypeOf[T].typeSymbol
-    impl(controller, c.eval(path))
+
+    val folder = ".*`(.*)`".r
+    impl(controller, c.eval(path), Some(new File(
+      showCode(routesFilePath.tree) match {
+        case folder(routesFile) ⇒ routesFile
+      }
+    )))
     q"""
         ()
       """
