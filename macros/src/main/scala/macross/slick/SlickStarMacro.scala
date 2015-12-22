@@ -5,9 +5,6 @@ import scala.reflect.macros.blackbox.Context
 
 import slick.lifted.{Rep, ForeignKeyQuery}
 
-private case class SlickModelColumnSwap[Column, ModelField]
-(rep: Rep[Column])
-(c2m: Column ⇒ ModelField, m2c: ModelField ⇒ Column)
 
 /**
   * Created by yu jie shui on 2015/11/26 16:21.
