@@ -1,6 +1,6 @@
 *.class
 *.log
-
+.project/NexusConf.scala
 # sbt specific
 .idea/
 .cache

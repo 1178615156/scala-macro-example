@@ -3,7 +3,7 @@ import Keys._
 
 object BuildSettings {
 
-
+  import NexusConf._
 
   val paradiseVersion = "2.1.0-M5"
 
@@ -17,19 +17,9 @@ object BuildSettings {
       )
   )
 
-  val nexus_ip = "192.168.1.200"
-  val nexus_url = s"http://$nexus_ip:8081/nexus/"
-  val resolversSetting: Seq[Def.Setting[Seq[Resolver]]] = Seq(
-//    resolvers += "Nexus" at nexus_url + "content/groups/public",
-//    resolvers += Resolver.url("Edulify Repository", url(s"http://$nexus_ip:8081/nexus/content/groups/public"))(Resolver.ivyStylePatterns)
-  )
-
-  val publishSetting = Seq(
-    credentials += Credentials("Sonatype Nexus Repository Manager", nexus_ip, "admin", "admin123"),
-    publishTo := Some("releases" at (nexus_url + "content/repositories/snapshots"))
-  )
-
-  val buildSettings = Seq(
+  val resolversSetting = nexusResolvers.getOrElse(Nil)
+  val publishSetting   = nexusResolvers.getOrElse(Nil)
+  val buildSettings    = Seq(
     organization := "com.yjs",
     scalaVersion := "2.11.7",
     version := "1.0-SNAPSHOT",
@@ -41,7 +31,6 @@ object BuildSettings {
       //      "-Ybackend:GenBCode",
       //      "-Ydelambdafy:method"
     )
-    //    libraryDependencies += "org.scala-lang.modules" %% "scala-java8-compat" % "0.5.0"
   ) ++ macroSetting ++ resolversSetting ++ publishSetting
 
 }
