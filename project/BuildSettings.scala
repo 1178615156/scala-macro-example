@@ -1,7 +1,10 @@
 import sbt._
 import Keys._
+import NexusConf._
 
 object BuildSettings {
+  val resolversSetting = nexusResolvers.getOrElse(Nil)
+  val publishSetting   = nexusResolvers.getOrElse(Nil)
 
 
 
@@ -17,17 +20,6 @@ object BuildSettings {
       )
   )
 
-  val nexus_ip = "192.168.1.200"
-  val nexus_url = s"http://$nexus_ip:8081/nexus/"
-  val resolversSetting: Seq[Def.Setting[Seq[Resolver]]] = Seq(
-//    resolvers += "Nexus" at nexus_url + "content/groups/public",
-//    resolvers += Resolver.url("Edulify Repository", url(s"http://$nexus_ip:8081/nexus/content/groups/public"))(Resolver.ivyStylePatterns)
-  )
-
-  val publishSetting = Seq(
-    credentials += Credentials("Sonatype Nexus Repository Manager", nexus_ip, "admin", "admin123"),
-    publishTo := Some("releases" at (nexus_url + "content/repositories/snapshots"))
-  )
 
   val buildSettings = Seq(
     organization := "com.yjs",
