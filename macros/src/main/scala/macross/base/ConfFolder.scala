@@ -8,12 +8,16 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 
 /**
+  * the idea from wacai/config-annotation
+  * [[https://github.com/wacai/config-annotation/blob/master/src/main/scala/com/wacai/config/annotation/Macro.scala]]
+  *
   * Created by yjs on 2015/12/13.
   */
 trait ConfFolder {
   val c: Context
   lazy val config = ConfigFactory.load()
-  object Play{
+
+  object Play {
     val DefaultOutputDir  = "conf"
     val OutputDirSettings = "conf.output.dir="
 
@@ -27,4 +31,5 @@ trait ConfFolder {
       f
     }
   }
+
 }
