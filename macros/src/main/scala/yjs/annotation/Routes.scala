@@ -13,4 +13,6 @@ object Routes {
 
   class Put(val url: String) extends scala.annotation.StaticAnnotation
 
+  class Path(val path: String) extends scala.annotation.StaticAnnotation
+
 }

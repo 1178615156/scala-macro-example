@@ -1,37 +1,22 @@
-package macross.play
+package macross.play.spi
 
-import scala.annotation.StaticAnnotation
-import scala.language.experimental.macros
-import scala.reflect.macros.whitebox.Context
+import scala.reflect.macros.blackbox
 
 import java.io.{File, PrintWriter}
 
 import macross.annotation.base.AnnotationParam
 import macross.base.{ProjectFolder, ShowInfo}
-import yjs.annotation.Routes.{Delete, Get, Post, Put}
+import macross.play.RoutesFilePath
+import yjs.annotation.Routes._
 
 /**
-  * Created by yu jie shui on 2015/12/11 15:25.
+  * Created by yu jie shui on 2016/1/4 18:50.
   */
-class MakeRoutes(path: String) extends StaticAnnotation {
-  def macroTransform(annottees: Any*): Any = macro MakeRoutesImpl.annotationImpl
-}
-
-trait RoutesFilePath
-object MakeRoutes {
-
-
-  def routesFilePath[T](path: String)(implicit routesFilePath: RoutesFilePath): Unit =
-  macro MakeRoutesImpl.routesFilePathImpl[T]
-
-  def apply[T](path: String): Unit =
-  macro MakeRoutesImpl.pathImpl[T]
-}
-
-class MakeRoutesImpl(val c: Context)
+trait MakePlayRoutesMacroImpl
   extends ProjectFolder
   with ShowInfo
   with AnnotationParam {
+  val c: blackbox.Context
 
   private[this] case class RouteLine(HttpMethod: String, url: String, codeMethod: String, params: String = "") {
     def id = HttpMethod + url + codeMethod
@@ -104,7 +89,7 @@ class MakeRoutesImpl(val c: Context)
   }
 
 
-  private def impl(controller: Symbol, path: String, routesFile: Option[File] = None) = {
+  def impl(controller: Symbol, path: String, routesFile: Option[File] = None) = {
     val controllerRouteLines: Seq[RouteLine] = this.controllerRouteLines(controller, path)
     val fileRouteLines: Seq[RouteLine] = this.fileRoutesLines(routesFile.getOrElse(this.defaultRoutesFile))
     val fileRoutesMap = fileRouteLines
@@ -141,40 +126,5 @@ class MakeRoutesImpl(val c: Context)
 
   }
 
-  def annotationImpl(annottees: c.Expr[Any]*): c.Expr[Any] = {
 
-    // get make routes path property
-    val path = annotationParams.head.collect {
-      case q"${Literal(Constant(path: String))}" ⇒ path
-      case q"path=${Literal(Constant(path: String))}" ⇒ path
-    }.head
-
-    val controller: c.universe.Symbol = c.typecheck(annottees.head.tree).symbol
-
-    impl(controller, path)
-
-    c.Expr(q"{..${annottees}}")
-  }
-
-  def pathImpl[T: c.WeakTypeTag](path: c.Expr[String]) = {
-    val controller: c.universe.Symbol = c.weakTypeOf[T].typeSymbol
-    impl(controller, c.eval(path))
-    q"""
-        ()
-      """
-  }
-
-  def routesFilePathImpl[T: c.WeakTypeTag](path: c.Expr[String])(routesFilePath: c.Expr[RoutesFilePath]) = {
-    val controller: c.universe.Symbol = c.weakTypeOf[T].typeSymbol
-
-    val folder = ".*`(.*)`".r
-    impl(controller, c.eval(path), Some(new File(
-      showCode(routesFilePath.tree) match {
-        case folder(routesFile) ⇒ routesFile
-      }
-    )))
-    q"""
-        ()
-      """
-  }
 }
