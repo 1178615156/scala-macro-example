@@ -7,7 +7,7 @@ import scala.reflect.macros.whitebox.Context
 import java.io.{File, PrintWriter}
 
 import macross.annotation.base.AnnotationParam
-import macross.base.{ConfFolder, ShowInfo}
+import macross.base.{ProjectFolder, ShowInfo}
 import yjs.annotation.Routes.{Delete, Get, Post, Put}
 
 /**
@@ -17,11 +17,11 @@ class MakeRoutes(path: String) extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro MakeRoutesImpl.annotationImpl
 }
 
+trait RoutesFilePath
 object MakeRoutes {
 
-  trait RoutesFilePath
 
-  def routesFilePath[T](path: String)(implicit routesFilePath: MakeRoutes.RoutesFilePath): Unit =
+  def routesFilePath[T](path: String)(implicit routesFilePath: RoutesFilePath): Unit =
   macro MakeRoutesImpl.routesFilePathImpl[T]
 
   def apply[T](path: String): Unit =
@@ -29,7 +29,7 @@ object MakeRoutes {
 }
 
 class MakeRoutesImpl(val c: Context)
-  extends ConfFolder
+  extends ProjectFolder
   with ShowInfo
   with AnnotationParam {
 
@@ -164,7 +164,7 @@ class MakeRoutesImpl(val c: Context)
       """
   }
 
-  def routesFilePathImpl[T: c.WeakTypeTag](path: c.Expr[String])(routesFilePath: c.Expr[MakeRoutes.RoutesFilePath]) = {
+  def routesFilePathImpl[T: c.WeakTypeTag](path: c.Expr[String])(routesFilePath: c.Expr[RoutesFilePath]) = {
     val controller: c.universe.Symbol = c.weakTypeOf[T].typeSymbol
 
     val folder = ".*`(.*)`".r

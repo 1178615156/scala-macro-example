@@ -13,7 +13,7 @@ import scala.reflect.macros.blackbox.Context
   *
   * Created by yjs on 2015/12/13.
   */
-trait ConfFolder {
+trait ProjectFolder {
   val c: Context
   lazy val config = ConfigFactory.load()
 
@@ -21,6 +21,9 @@ trait ConfFolder {
     val DefaultOutputDir  = "conf"
     val OutputDirSettings = "conf.output.dir="
 
+    lazy val rootFolder    = new File("").getParentFile
+    lazy val appFolder     = {
+    }
     lazy val confOutputDir = {
       val f = new File(c.settings
         .find(_.startsWith(OutputDirSettings))
