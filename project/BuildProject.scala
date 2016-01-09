@@ -20,7 +20,8 @@ object BuildProject extends Build {
     buildSettings ++ unPublish) dependsOn macros
 
   lazy val using = Project("macros_using", file("macros_using"), settings =
-    buildSettings ++ unPublish ++ slickDepend) dependsOn macros dependsOn macros_try dependsOn stackoverflow
+    buildSettings ++ unPublish ++ slickDepend ++ testFrameworkDepend
+  ) dependsOn macros dependsOn macros_try dependsOn stackoverflow
 
   lazy val `scala-macro-example` = Project("scala-macro-example", file("."), settings =
     buildSettings ++ unPublish ++ Seq()
@@ -30,7 +31,7 @@ object BuildProject extends Build {
       using % "compile->compile;test->test",
       macros_try % "compile->compile;test->test",
       stackoverflow % "compile->compile;test->test")
-    .aggregate(macros , using, macros_try, stackoverflow)
+    .aggregate(macros, using, macros_try, stackoverflow)
 }
 
 

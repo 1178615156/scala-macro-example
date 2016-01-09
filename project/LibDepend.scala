@@ -8,11 +8,7 @@ object LibDepend {
   val slickDepend = libraryDependencies ++= slickLib
 
   val testFrameworkLib    = Seq(
-    "com.google.guava" % "guava" % "18.0" % "test",
-    ("org.testng" % "testng" % "6.9.6" % "test").exclude(
-      "com.google.guava", "guava"
-    ),
-  "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test"
+    "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test"
   )
   val testFrameworkDepend = libraryDependencies ++= testFrameworkLib
   val akkaDepend          = libraryDependencies ++= Seq(

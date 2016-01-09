@@ -1,5 +1,4 @@
 package macross.tran
-import org.testng.annotations._
 
 class TranAlgorithmTest {
   val option = "option"
@@ -23,7 +22,6 @@ class TranAlgorithmTest {
   val in: TypeList = List(option, future, option, option, value)
   val to: TypeList = List(future, option, option, value)
 
-  @Test(priority = 0)
   def listTriangleTest(): Unit = {
     assert(listTriangle(List(1).map(_.toString)) ==
       List(
@@ -43,7 +41,6 @@ class TranAlgorithmTest {
   }
 
 
-  @Test(priority = 10)
   def splitListTest(): Unit = {
     assert(splitList(List(1, 2, 3).map(_.toString)) == List(
       (List("1"), List("2", "3")),
@@ -52,7 +49,6 @@ class TranAlgorithmTest {
     println(splitList(List(1, 2, 3).map(_.toString)))
   }
 
-  @Test(priority = 20)
   def exeReplaceTest(): Unit = {
     val rt = exeSingleReplace(in)
 
@@ -63,7 +59,6 @@ class TranAlgorithmTest {
   }
 
 
-  @Test(priority = 30)
   def exeAllReplaceTest(): Unit = {
     val rt = exeAllReplace(in)
     rt.map(_.map(e ⇒ e.head ++ e.to)) == List(
@@ -75,7 +70,6 @@ class TranAlgorithmTest {
   }
 
 
-  @Test(priority = 40)
   def exeTest(): Unit ={
     def exe(replaceExpr: ReplaceExpr): List[ReplaceExpr] = {
       val ll = exeAllReplace(replaceExpr.typeList)
