@@ -4,8 +4,9 @@ import scala.annotation.StaticAnnotation
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
-import java.io.File
+import java.io.{PrintWriter, File}
 
+import macross.play.spi.RouteLine
 import yjs.annotation.Routes.Path
 
 /**
@@ -29,7 +30,10 @@ class MakePlayRoutes extends StaticAnnotation {
 }
 
 object MakePlayRoutes {
+}
 
+object MakeUrlFile {
+  def apply[T](filePath: String, packageName: String): Any = macro MakePlayRoutesImpl.mkUrlFile[T]
 }
 
 class MakePlayRoutesImpl(val c: blackbox.Context) extends spi.MakePlayRoutesMacroImpl {
@@ -87,6 +91,49 @@ class MakePlayRoutesImpl(val c: blackbox.Context) extends spi.MakePlayRoutesMacr
       """
   }
 
+  def mkUrlFile[T: c.WeakTypeTag](filePath: c.Expr[String], packageName: c.Expr[String]) = {
+    val controller = c.weakTypeOf[T].typeSymbol
+    val controllerPath = controller.annotations.filter(_.tree.tpe <:< typeOf[Path]).map(_.tree).map {
+      case q"new  ${annotation}(${Literal(Constant(path: String))} )" ⇒ path
+      case q"new  ${annotation}(path= ${Literal(Constant(path: String))} )" ⇒ path
+    }
+
+    controllerPath.foreach(path ⇒ {
+      val file = new File(c.eval(filePath).replaceAll("\\.", "\\") + "\\" + controller.name.toString + ".scala")
+      if (!file.getParentFile.exists()) file.getParentFile.mkdirs()
+      val a: Seq[RouteLine] = this.controllerRouteLines(controller, path)
+      val printFile = new PrintWriter(file)
+
+      val out: String = {
+        a.map(_.url) zip a.map(_.url).map(_.replace(path, "")) map {
+          case (url: String, name: String) ⇒
+            s"""
+               |val ${
+              val h =
+                if (name.head.toString == "/")
+                  ""
+                else
+                  name.head.toString
+              h + name.tail.replaceAll("/", "_")
+            } = "$url"
+           """.stripMargin
+        } mkString "\n"
+      }
+      showInfo(show(out))
+      printFile.write(
+        s"""
+           |package ${c.eval(packageName)}
+           |object ${controller.name.toString}{
+           |  $out
+           |}
+           |
+         """.stripMargin)
+      printFile.close()
+    })
+
+
+    q"()"
+  }
 }
 
 

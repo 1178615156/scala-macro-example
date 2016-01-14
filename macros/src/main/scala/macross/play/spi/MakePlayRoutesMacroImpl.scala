@@ -12,15 +12,17 @@ import yjs.annotation.Routes._
 /**
   * Created by yu jie shui on 2016/1/4 18:50.
   */
+
+case class RouteLine(HttpMethod: String, url: String, codeMethod: String, params: String = "") {
+  def id = HttpMethod + url + codeMethod
+}
 trait MakePlayRoutesMacroImpl
   extends ProjectFolder
   with ShowInfo
   with AnnotationParam {
   val c: blackbox.Context
 
-  private[this] case class RouteLine(HttpMethod: String, url: String, codeMethod: String, params: String = "") {
-    def id = HttpMethod + url + codeMethod
-  }
+
 
   import c.universe._
 
@@ -36,7 +38,7 @@ trait MakePlayRoutesMacroImpl
   }
 
 
-  private[this] def controllerRouteLines(controller: Symbol, path: String): Seq[RouteLine] = {
+   def controllerRouteLines(controller: Symbol, path: String): Seq[RouteLine] = {
     val controllerMethod =
       controller.typeSignature.members
         .filter(e ⇒ e.annotations.nonEmpty)
