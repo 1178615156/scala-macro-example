@@ -42,7 +42,6 @@ class MakePlayRoutesImpl(val c: blackbox.Context) extends spi.MakePlayRoutesMacr
       case q"new  ${annotation}(${Literal(Constant(path: String))} )" ⇒ path
       case q"new  ${annotation}(path= ${Literal(Constant(path: String))} )" ⇒ path
     }
-
     controllerPath.foreach(path ⇒ impl(controller, path))
 
     c.Expr(q"{..${annottees}}")

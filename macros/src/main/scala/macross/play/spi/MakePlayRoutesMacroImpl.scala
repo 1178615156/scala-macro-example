@@ -76,11 +76,11 @@ trait MakePlayRoutesMacroImpl
 
   private[this] def fileRoutesLines(routesFile: File): Seq[RouteLine] = {
     val asRequestUrl =
-      "(GET|POST|DELETE|PUT|->) +([a-z|A-Z|/|0-9|_]+) +(@|[a-z|A-Z|.|0-9|_]+)".r
+      "(GET|POST|DELETE|PUT|->) +([a-z|A-Z|/|0-9|_]+) +([@|a-z|A-Z|.|0-9|_]+)".r
     val asRequestUrlWithParams =
-      "(GET|POST|DELETE|PUT|->) +([a-z|A-Z|/|0-9|_]+) +(@|[a-z|A-Z|.|0-9|_]+) ?(\\(.*\\))".r
+      "(GET|POST|DELETE|PUT|->) +([a-z|A-Z|/|0-9|_]+) +([@|a-z|A-Z|.|0-9|_]+) ?(\\(.*\\))".r
 
-    val routes = scala.io.Source.fromFile(routesFile).getLines()
+    val routes = scala.io.Source.fromFile(routesFile).getLines().toList
     val fileRoutes: Seq[RouteLine] = routes.collect {
       case asRequestUrlWithParams(a, b, c, d) ⇒ RouteLine(a.trim, b.trim, c.trim, d.trim)
       case asRequestUrl(a, b, c) ⇒ RouteLine(a.trim, b.trim, c.trim)
@@ -96,7 +96,6 @@ trait MakePlayRoutesMacroImpl
       .filterNot(e ⇒ controllerRouteLines.exists(_.url == e.url))
       .filterNot(e ⇒ controllerRouteLines.exists(_.codeMethod == e.codeMethod))
       .map(e ⇒ e.id → e).toMap
-
     val out = fileRoutesMap ++ controllerRouteLines.map(e ⇒ e.id → e).toMap
 
     val hasChange = !out.toList.map(_._2).forall(e ⇒ fileRouteLines.contains(e))
