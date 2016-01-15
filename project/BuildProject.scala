@@ -25,7 +25,7 @@ object BuildProject extends Build {
   )
     .dependsOn(
       macros % "compile->compile;test->test",
-      using % "compile->compile;test->test",
+      using % "test->test",
       stackoverflow % "test->test")
     .aggregate(macros, using, stackoverflow)
 }

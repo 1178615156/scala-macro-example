@@ -3,36 +3,22 @@ import Keys._
 
 object NexusConf {
 
-  val nexus_ip  = "localhost"
-  val nexus_url = (s"http://${nexus_ip}:8081/nexus/")
-
+  val nexus_ip  = "121.199.26.84"
+  val nexus_url = s"http://$nexus_ip:8081/nexus"
 
   val publishSetting = Seq(
-    credentials += Credentials("Sonatype Nexus Repository Manager",
-      nexus_ip,
-      ("nexus.name"),
-      ("nexus.password")
-    ),
-    publishTo := Some("releases" at (nexus_url + "content/repositories/snapshots"))
+    publishTo := Some("nexus publish" at (nexus_url + "/content/repositories/snapshots"))
   )
 
   val nexusResolvers = Seq(
-    credentials += Credentials("Sonatype Nexus Repository Manager",
-      nexus_ip,
-      ("nexus.name"),
-      ("nexus.password")
-    ),
-    resolvers += "localhost" at s"$nexus_url/content/groups/public/"
+    credentials += Credentials(Path.userHome / ".sbt" / "credentials")
   )
-
 }
 
 object BuildSettings {
 
-  import NexusConf._
-
-  val resolversSetting = Nil
-  val publishSetting   = Nil
+  val resolversSetting = NexusConf.nexusResolvers
+  val publishSetting   = NexusConf.publishSetting
 
   val paradiseVersion = "2.1.0-M5"
 
@@ -56,22 +42,20 @@ object BuildSettings {
   val scalaOptionSetting = scalacOptions ++= Seq(
     "-deprecation",
     "-encoding", "UTF-8",
-    //    "-feature", "-language:_",
-    //    "-Xlint", "-unchecked",
+    "-feature", "-language:_",
     "-target:jvm-1.8"
+    //    "-Xlint", "-unchecked",
+    //      "-Ymacro-debug-lite",
+    //      "-Xexperimental",
+    //      "-Ybackend:GenBCode",
+    //      "-Ydelambdafy:method"
   )
-  val buildSettings    = Seq(
-    organization := "com.yjs",
-    scalaVersion := "2.11.7",
-    version := "1.0-SNAPSHOT",
-    scalacOptions ++= Seq(
-      //      "-Ymacro-debug-lite",
-      //      "-Xexperimental",
-      //      "-target:jvm-1.8",
-      "-encoding", "UTF-8"
-      //      "-Ybackend:GenBCode",
-      //      "-Ydelambdafy:method"
-    )
-  ) ++ macrosSetting ++ resolversSetting ++ publishSetting
+
+  val javacOptionsSetting = javacOptions ++= Seq(
+    "-encoding", "UTF-8"
+  )
+
+  val buildSettings =
+    infoSetting ++ scalaOptionSetting ++ macrosSetting ++ resolversSetting ++ publishSetting ++ javacOptionsSetting
 
 }
