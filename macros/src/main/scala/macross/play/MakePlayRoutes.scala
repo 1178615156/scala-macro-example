@@ -28,8 +28,19 @@ import yjs.annotation.Routes.Path
 class MakePlayRoutes extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro MakePlayRoutesImpl.annotationMakePlayRoutesImpl
 }
+//class MakePlayRoutesTest extends StaticAnnotation {
+//  def macroTransform(annottees: Any*): Any = macro MakePlayRoutesTestImpl.annotationMakePlayRoutesImpl
+//}
+//class  MakePlayRoutesTestImpl(val c: blackbox.Context){
+//  import c.universe._
+//
+//  def annotationMakePlayRoutesImpl(annottees: c.Expr[Any]*): c.Tree={
+//    q"{..$annottees}"
+//  }
+//}
 
 object MakePlayRoutes {
+  def apply[T]: Unit = macro MakePlayRoutesImpl.objectApply[T]
 }
 
 object MakeUrlFile {
@@ -40,55 +51,29 @@ class MakePlayRoutesImpl(val c: blackbox.Context) extends spi.MakePlayRoutesMacr
 
   import c.universe._
 
-  def annotationMakePlayRoutesImpl(annottees: c.Expr[Any]*): c.Expr[Any] = {
-    val controller = c.typecheck(annottees.head.tree).symbol
-    val controllerPath = controller.annotations.filter(_.tree.tpe <:< typeOf[Path]).map(_.tree).map {
+  def objectApply[T: c.WeakTypeTag]: c.Tree = {
+    val controller = c.weakTypeOf[T].typeSymbol
+    val controllerPath = getControllerPath(controller)
+    controllerPath.foreach(path ⇒ impl(controller, path))
+    q"()"
+  }
+
+  def getControllerPath(controller: Symbol): List[String] = {
+    controller.annotations.filter(_.tree.tpe <:< typeOf[Path]).map(_.tree).map {
       case q"new  ${annotation}(${Literal(Constant(path: String))} )" ⇒ path
       case q"new  ${annotation}(path= ${Literal(Constant(path: String))} )" ⇒ path
     }
+  }
+
+  def annotationMakePlayRoutesImpl(annottees: c.Expr[Any]*): c.Tree = {
+    showInfo(show("--in----"))
+    val controller: c.universe.Symbol = c.typecheck(annottees.head.tree).symbol
+    val controllerPath = getControllerPath(controller)
     controllerPath.foreach(path ⇒ impl(controller, path))
 
-    c.Expr(q"{..${annottees}}")
-  }
-
-  @deprecated
-  def annotationImpl(annottees: c.Expr[Any]*): c.Expr[Any] = {
-
-    // get make routes path property
-    val path = annotationParams.head.collect {
-      case q"${Literal(Constant(path: String))}" ⇒ path
-      case q"path=${Literal(Constant(path: String))}" ⇒ path
-    }.head
-
-    val controller: c.universe.Symbol = c.typecheck(annottees.head.tree).symbol
-
-    impl(controller, path)
-
-    c.Expr(q"{..${annottees}}")
-  }
-
-  @deprecated
-  def pathImpl[T: c.WeakTypeTag](path: c.Expr[String]) = {
-    val controller: c.universe.Symbol = c.weakTypeOf[T].typeSymbol
-    impl(controller, c.eval(path))
-    q"""
-        ()
-      """
-  }
-
-  @deprecated
-  def routesFilePathImpl[T: c.WeakTypeTag](path: c.Expr[String])(routesFilePath: c.Expr[RoutesFilePath]) = {
-    val controller: c.universe.Symbol = c.weakTypeOf[T].typeSymbol
-
-    val folder = ".*`(.*)`".r
-    impl(controller, c.eval(path), Some(new File(
-      showCode(routesFilePath.tree) match {
-        case folder(routesFile) ⇒ routesFile
-      }
-    )))
-    q"""
-        ()
-      """
+    showInfo(show((q"{..${annottees}}")))
+    q"{..$annottees}"
+//    Block(annottees.map(_.tree):_*)
   }
 
   def mkUrlFile[T: c.WeakTypeTag](filePath: c.Expr[String], packageName: c.Expr[String]) = {
@@ -134,6 +119,48 @@ class MakePlayRoutesImpl(val c: blackbox.Context) extends spi.MakePlayRoutesMacr
 
     q"()"
   }
+
+  @deprecated
+  def annotationImpl(annottees: c.Expr[Any]*): c.Expr[Any] = {
+
+    // get make routes path property
+    val path = annotationParams.head.collect {
+      case q"${Literal(Constant(path: String))}" ⇒ path
+      case q"path=${Literal(Constant(path: String))}" ⇒ path
+    }.head
+
+    val controller: c.universe.Symbol = c.typecheck(annottees.head.tree).symbol
+
+    impl(controller, path)
+
+    c.Expr(q"{..${annottees}}")
+  }
+
+  @deprecated
+  def pathImpl[T: c.WeakTypeTag](path: c.Expr[String]) = {
+    val controller: c.universe.Symbol = c.weakTypeOf[T].typeSymbol
+    impl(controller, c.eval(path))
+    q"""
+        ()
+      """
+  }
+
+  @deprecated
+  def routesFilePathImpl[T: c.WeakTypeTag](path: c.Expr[String])(routesFilePath: c.Expr[RoutesFilePath]) = {
+    val controller: c.universe.Symbol = c.weakTypeOf[T].typeSymbol
+
+    val folder = ".*`(.*)`".r
+    impl(controller, c.eval(path), Some(new File(
+      showCode(routesFilePath.tree) match {
+        case folder(routesFile) ⇒ routesFile
+      }
+    )))
+    q"""
+        ()
+      """
+  }
+
+
 }
 
 
@@ -143,7 +170,7 @@ class MakeRoutes(path: String) extends StaticAnnotation {
 }
 
 
-@deprecated
+@deprecated("user [[MakePlayRoutes]]")
 object MakeRoutes {
 
   def routesFilePath[T](path: String)(implicit routesFilePath: RoutesFilePath): Unit =
