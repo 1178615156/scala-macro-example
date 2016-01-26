@@ -109,7 +109,6 @@ trait TranRule {
     Replace(List(option, future), List(future, option), (i: ExprTree) => q"$i.sequence"),
     Replace(List(list, future), List(future, list), (i: ExprTree) => q"$i.sequence"),
     Replace(List(list, dbio), List(dbio, list), (i: ExprTree) => q"DBIO.sequence($i)")
-
   )
 }
 
