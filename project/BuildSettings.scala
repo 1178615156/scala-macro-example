@@ -36,7 +36,8 @@ object BuildSettings {
   val infoSetting = Seq(
     version := "1.0-SNAPSHOT",
     scalaVersion := "2.11.6",
-    organization := "com.yjs"
+    //    organization := "com.yjs"
+    organization := "com.wecash.financal"
   )
 
   val scalaOptionSetting = scalacOptions ++= Seq(
