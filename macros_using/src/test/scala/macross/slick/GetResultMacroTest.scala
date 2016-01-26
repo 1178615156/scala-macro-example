@@ -12,12 +12,11 @@ class GetResultMacroTest {
 
   case class Address(street: String, city: String, code: Option[Int])
 
-  case class User(id: Long, name: String, age: Option[Int], address: Address, address2: Option[Address])
+  case class User(id: Long, name: String, age: Option[Int], address: Address /*, address2: Option[Address]*/)
 
   implicit val implicitGetResultAddress = GetResultMacro.apply[Address]
 
   implicit val implicitGetResultUser =
-    GetResult(e⇒new User(e.<<?))
     GetResultMacro.apply[User]
 
 
