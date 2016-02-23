@@ -14,13 +14,12 @@ class GetResultMacroTest {
 
   case class User(id: Long, name: String, age: Option[Int], address: Address, address2: Option[Address])
 
-  implicit val implicitGetResultAddress = GetResultMacro.apply[Address]
-
-  implicit val implicitGetResultUser =
-    GetResult(e⇒new User(e.<<?))
-    GetResultMacro.apply[User]
-
-
-  sql"SELECT * FROM User WHEN TRUE ".as[User]
+//  implicit val implicitGetResultAddress = GetResultMacro.apply[Address]
+//
+//  implicit val implicitGetResultUser =
+//    GetResultMacro.apply[User]
+//
+//
+//  sql"SELECT * FROM User WHEN TRUE ".as[User]
 
 }
