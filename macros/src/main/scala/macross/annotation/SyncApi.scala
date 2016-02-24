@@ -10,11 +10,11 @@ import macross.base.GetInClass
 /**
   * Created by yujieshui on 2016/2/23.
   */
-trait SyncFuture extends StaticAnnotation {
-  def macroTransform(annottees: Any*): Any = macro SyncFutureImpl.impl
+class SyncApi[T](f: T) extends StaticAnnotation {
+  def macroTransform(annottees: Any*): Any = macro SyncApiImpl.impl
 }
 
-class SyncFutureImpl(val c: Context) extends GetInClass with base.ClassWithFunc {
+class SyncApiImpl(val c: Context) extends GetInClass with base.ClassWithFunc with base.AnnotationParam {
 
   import c.universe._
 
@@ -28,17 +28,17 @@ class SyncFutureImpl(val c: Context) extends GetInClass with base.ClassWithFunc 
 
   def impl(annottees: c.Expr[Any]*): Tree = {
     val __self = q"val __self = this"
+    val mapFunc = annotationParams.head.head
+
     val body = getBody(annottees.head.tree)
     val bodyFunc = body
       .collect { case e: DefDef => e }
       .filterNot(e => e.mods.hasFlag(Flag.PRIVATE) || e.mods.hasFlag(Flag.PROTECTED))
       .map { case q"$mod def $name [..$ts] (...${_params}) = $body" =>
         val params: List[List[ValDef]] = _params
-        q"$mod def $name [..$ts] (...$params) = __self.$name[..$ts](...${params.map(_.map(_.name))})"
+        q"$mod def $name [..$ts] (...$params) = $mapFunc.apply( __self.$name[..$ts](...${params.map(_.map(_.name))}))"
       }
-    println(
-      showRaw(bodyFunc)
-    )
+
     val syncClass =
       q"""
       class Sync{
@@ -48,13 +48,11 @@ class SyncFutureImpl(val c: Context) extends GetInClass with base.ClassWithFunc 
 
     val syncFunc = q"val sync = new Sync"
     val result = classWithFunc(annottees.head.tree, List(
-      __self, syncClass,syncFunc
+      __self, syncClass, syncFunc
     ))
 
 
-    println(showRaw(
-      result
-    ))
+
     q" $result "
 
   }
