@@ -34,9 +34,17 @@ class SyncApiImpl(val c: Context) extends GetInClass with base.ClassWithFunc wit
     val bodyFunc = body
       .collect { case e: DefDef => e }
       .filterNot(e => e.mods.hasFlag(Flag.PRIVATE) || e.mods.hasFlag(Flag.PROTECTED))
-      .map { case q"$mod def $name [..$ts] (...${_params}) = $body" =>
-        val params: List[List[ValDef]] = _params
-        q"$mod def $name [..$ts] (...$params) = $mapFunc.apply( __self.$name[..$ts](...${params.map(_.map(_.name))}))"
+      .collect {
+        case q"$mod def $name [..$ts] (...${_params}) : $rt = $body" =>
+          val params: List[List[ValDef]] = _params
+          q"$mod def $name [..$ts] (...$params) = $mapFunc.apply( __self.$name[..$ts](...${params.map(_.map(_.name))}))"
+        case q"$mod def $name [..$ts] (...${_params})  = $body" =>
+          val params: List[List[ValDef]] = _params
+          q"$mod def $name [..$ts] (...$params) = $mapFunc.apply( __self.$name[..$ts](...${params.map(_.map(_.name))}))"
+        case q"$mod def $name [..$ts] (...${_params}) " =>
+          val params: List[List[ValDef]] = _params
+          q"$mod def $name [..$ts] (...$params) = $mapFunc.apply( __self.$name[..$ts](...${params.map(_.map(_.name))}))"
+
       }
 
     val syncClass =
@@ -49,6 +57,9 @@ class SyncApiImpl(val c: Context) extends GetInClass with base.ClassWithFunc wit
     val syncFunc = q"val sync = new Sync"
     val result = classWithFunc(annottees.head.tree, List(
       __self, syncClass, syncFunc
+    ))
+    println(showCode(
+      result
     ))
 
 

@@ -19,9 +19,9 @@ class SyncApiUsing[T] {
   private def fff = Future.successful(1)
 }
 @SyncApi(a.AF)
-trait AAA{
+trait AAA[Key,Value]{
   def f(iiii: Int) = Future.successful("hello")
-
+  def get(key: Key): Future[Option[Value]]
 }
 
 object M {
