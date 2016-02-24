@@ -13,12 +13,16 @@ package a{
 
 
 @SyncApi(a.AF)
-class SyncApiUsing {
+class SyncApiUsing[T] {
   def f(iiii: Int) = Future.successful("hello")
 
   private def fff = Future.successful(1)
 }
+@SyncApi(a.AF)
+trait AAA{
+  def f(iiii: Int) = Future.successful("hello")
 
+}
 
 object M {
   def main(args: Array[String]) {

@@ -20,8 +20,8 @@ class SyncApiImpl(val c: Context) extends GetInClass with base.ClassWithFunc wit
 
   def getBody(tree: Tree): List[Tree] = {
     tree match {
-      case q"$mod class $name (...$params) extends ..$bases {..$body} " => body: List[Tree]
-      case q"$mod trait $name extends ..$bases {..$body} " => body: List[Tree]
+      case q"$mod class $name[..$t] (...$params) extends ..$bases {..$body} " => body: List[Tree]
+      case q"$mod trait $name[..$t] extends ..$bases {..$body} " => body: List[Tree]
     }
   }
 
