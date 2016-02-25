@@ -12,16 +12,16 @@ trait ClassWithFunc {
   //with function
   def classWithFunc(caseClass: Tree, listDef: List[Tree]): c.universe.Tree = {
     caseClass match {
-      case q"$mod class $name(..$params) extends ..$bases { ..$body }" ⇒
+      case q"$mod class $name[..$t](..$params) extends ..$bases { ..$body }" ⇒
         q"""
-            $mod class $name(..$params) extends ..$bases {
+            $mod class $name[..$t](..$params) extends ..$bases {
             ..$body
             ..$listDef
             }
             """
-      case q"$mod trait $name extends ..$base {..$body}"=>
+      case q"$mod trait $name[..$t] extends ..$base {..$body}"=>
         q"""
-            $mod trait $name extends ..$base {
+            $mod trait $name[..$t] extends ..$base {
             ..$body
             ..$listDef
             }

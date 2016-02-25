@@ -15,10 +15,6 @@ class MakeNoArgsConstructorMacros extends StaticAnnotation {
 }
 
 class MakeNoArgsConstructorMacrosImpl(val c: Context)
-//let us reuse code
-//only has a getInClass
-//we already write it in MakeGetSetImpl
-//so no copy yet reuse it
   extends GetInClass
   with base.ClassWithFunc {
 
