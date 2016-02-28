@@ -8,32 +8,17 @@ import scala.reflect.macros.blackbox.Context
  */
 
 object GetPublicValMacros {
-  /**
-   *
-   * @tparam ClassType
-   * @tparam ReturnType if no write return type then
-   *                    the compiler un not sure the return type
-   *                    or use List[Any]
-   * @return
-   */
   def listValue[ClassType, ReturnType]: List[ReturnType] = macro GetPublicValMacrosImpl.listValueImpl[ClassType, ReturnType]
 
   def mapValue[ClassType, ReturnType]: Map[String,ReturnType] = macro GetPublicValMacrosImpl.mapValueImpl[ClassType, ReturnType]
 }
 
-/**
- * mast add val in the c:Context
- * because if no val then the c is private
- * @param c
- */
 class GetPublicValMacrosImpl(val c: Context) {
 
   import c.universe._
 
   def getPublicVal(typ: c.Type) = {
-    //get class inside all method
     typ.members.filter(_.isMethod).map(_.asMethod)
-      //only get public
       .filter(_.isPublic)
 
   }
@@ -42,20 +27,13 @@ class GetPublicValMacrosImpl(val c: Context) {
     val typ: c.Type = c.weakTypeOf[ClassType]
     val rt = c.weakTypeOf[ReturnType]
     c.Expr[List[ReturnType]](
-    // quasiquotes instructions :
-    // http://docs.scala-lang.org/overviews/quasiquotes/intro.html
       q"""
     List(..${
         getPublicVal(typ)
-          // filter return type is ReturnType
           .filter(_.info.resultType.<:<(rt))
-          //if is a val then the value has getter method
-          //but if is private[this] val will be not
           .filter(_.isGetter)
           .map(_.name)
           .toList.reverse
-        //why need reverse
-        //you guess
       }).asInstanceOf[List[$rt]].filter(_!=null)
     """
     )

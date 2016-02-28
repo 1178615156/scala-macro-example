@@ -7,7 +7,6 @@ import java.io.{File, PrintWriter}
 
 import macross.annotation.base.AnnotationParam
 import macross.base.{ProjectFolder, ShowInfo}
-import macross.play.RoutesFilePath
 import yjs.annotation.Routes._
 
 /**

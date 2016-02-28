@@ -3,8 +3,6 @@ package macross.slick
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 
-import macross.{ControlMacroLogMacro, ControlMacroLog}
-import slick.lifted.ForeignKeyQuery
 
 
 /**
@@ -12,26 +10,20 @@ import slick.lifted.ForeignKeyQuery
   */
 
 trait SortByName {
-
-
   def applyPrefix[EntityTable](entityTable: EntityTable,
                                asc: Boolean, //
-                               prefix: String)(
-                                implicit controlMacroLog: ControlMacroLog.Value
-                              )
+                               prefix: String)
   : PartialFunction[String, slick.lifted.Ordered] = macro SortByNameImpl.applyPrefix[EntityTable]
 
   def apply[EntityTable](entityTable: EntityTable,
                          sortField: String,
                          asc: Boolean)
-                        (implicit controlMacroLog: ControlMacroLog.Value)
   : slick.lifted.Ordered = macro SortByNameImpl.apply[EntityTable]
 
   @deprecated
   def applyDebug[EntityTable](entityTable: EntityTable,
                               sortField: String,
                               asc: Boolean)
-                             (implicit controlMacroLog: ControlMacroLog.Value)
   : slick.lifted.Ordered = macro SortByNameImpl.apply[EntityTable]
 }
 
@@ -40,7 +32,7 @@ object SortByName extends SortByName
 class SortByNameImpl(val c: Context)
   extends macross.base.ShowInfo
   with spi.GetTableRepValue
-  with ControlMacroLogMacro {
+   {
 
   import c.universe._
 
@@ -48,7 +40,6 @@ class SortByNameImpl(val c: Context)
                                                entityTable: c.Expr[EntityTable],
                                                asc: c.Expr[Boolean],
                                                prefix: c.Expr[String])
-                                             (controlMacroLog: c.Expr[ControlMacroLog.Value])
   : c.Expr[PartialFunction[String, slick.lifted.Ordered]] = {
     val etMembers = tableRepValue[EntityTable]
       .map(e => e.name.toString -> e.info.resultType)
@@ -84,7 +75,7 @@ class SortByNameImpl(val c: Context)
             }):slick.lifted.Ordered})
         }
         """
-    if (controlMacroLog.needShow) showInfo(show(rt))
+//     showInfo(show(rt))
 
     c.Expr[PartialFunction[String, slick.lifted.Ordered]](rt)
   }
@@ -92,11 +83,9 @@ class SortByNameImpl(val c: Context)
   def apply[EntityTable: c.WeakTypeTag](
                                          entityTable: c.Expr[EntityTable],
                                          sortField: c.Expr[String],
-                                         asc: c.Expr[Boolean])(
-                                         controlMacroLog: c.Expr[ControlMacroLog.Value]
-                                       ) = {
+                                         asc: c.Expr[Boolean])= {
     q"""
-      ${applyPrefix(entityTable, asc, c.Expr[String]( q""" "" """))(controlMacroLog)}($sortField)
+      ${applyPrefix(entityTable, asc, c.Expr[String]( q""" "" """))}($sortField)
       """
   }
 }

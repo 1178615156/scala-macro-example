@@ -23,10 +23,7 @@ object BuildProject extends Build {
   lazy val `scala-macro-example` = Project("scala-macro-example", file("."), settings =
     buildSettings ++ unPublish ++ Seq()
   )
-    .dependsOn(
-      macros % "compile->compile;test->test",
-      using % "test->test",
-      stackoverflow % "test->test")
+    .dependsOn(macros, using, stackoverflow)
     .aggregate(macros, using, stackoverflow)
 }
 
