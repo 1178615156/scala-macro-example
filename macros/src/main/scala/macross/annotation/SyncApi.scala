@@ -14,7 +14,11 @@ class SyncApi[T](f: T) extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro SyncApiImpl.impl
 }
 
-class SyncApiImpl(val c: Context) extends GetInClass with base.ClassWithFunc with base.AnnotationParam {
+class SyncApiImpl(val c: Context)
+  extends GetInClass
+    with base.ClassWithFunc
+    with base.AnnotationParam
+    with macross.base.ShowInfo {
 
   import c.universe._
 
@@ -25,9 +29,15 @@ class SyncApiImpl(val c: Context) extends GetInClass with base.ClassWithFunc wit
     }
   }
 
+  def getTs(tree: Tree): List[Tree] = {
+    tree match {
+      case q"$mod class $name[..$t] (...$params) extends ..$bases {..$body} " => t: List[Tree]
+      case q"$mod trait $name[..$t] extends ..$bases {..$body} " => t: List[Tree]
+    }
+  }
 
   def impl(annottees: c.Expr[Any]*): Tree = {
-    val __self = q"val __self = this"
+    val __self = q"def  __self = {this}"
     val mapFunc = annotationParams.head.head
 
     val body = getBody(annottees.head.tree)
@@ -35,30 +45,66 @@ class SyncApiImpl(val c: Context) extends GetInClass with base.ClassWithFunc wit
       .collect { case e: DefDef => e }
       .filterNot(e => e.mods.hasFlag(Flag.PRIVATE) || e.mods.hasFlag(Flag.PROTECTED))
       .collect {
+
         case q"$mod def $name [..$ts] (...${_params}) : $rt = $body" =>
-          val params: List[List[ValDef]] = _params
-          q"$mod def $name [..$ts] (...$params) = $mapFunc.apply( __self.$name[..$ts](...${params.map(_.map(_.name))}))"
+          (mod, name, ts, _params.asInstanceOf[List[List[ValDef]]], Some(rt))
         case q"$mod def $name [..$ts] (...${_params})  = $body" =>
-          val params: List[List[ValDef]] = _params
-          q"$mod def $name [..$ts] (...$params) = $mapFunc.apply( __self.$name[..$ts](...${params.map(_.map(_.name))}))"
-        case q"$mod def $name [..$ts] (...${_params}) " =>
-          val params: List[List[ValDef]] = _params
-          q"$mod def $name [..$ts] (...$params) = $mapFunc.apply( __self.$name[..$ts](...${params.map(_.map(_.name))}))"
+          (mod, name, ts, _params.asInstanceOf[List[List[ValDef]]], None)
 
-      }
+        // no body
+        case q"$mod def $name [..$ts] (...${_params}) : $rt " =>
+          (mod, name, ts, _params.asInstanceOf[List[List[ValDef]]], Some(rt))
+      }.map {
+      case (mod, name, ts, params, funcType) =>
+//        DefDef(mod, name, ts, params,
+//          funcType.getOrElse(EmptyTree)
+//          , q"{$mapFunc.apply( __self.$name[..$ts](...${params.map(_.map(_.name))}))}")
+      //        q"$mod def ${TermName("sync_" +name.toString())} [..$ts] (...$params) = {$mapFunc.apply( __self.$name[..$ts](...${params.map(_.map(_.name))}))}"
+              q"""
+$mod def ${TermName("sync_"+name.toString)} [..$ts] (...$params) =
+{$mapFunc.apply( this.$name[..$ts](...${params.map(_.map(_.name))}))}
+                  """
+    }
+    new {
+    }
+    showInfo(show(
+      bodyFunc
+    ))
 
+    val ts = getTs(annottees.head.tree)
     val syncClass =
       q"""
       class Sync{
         ..${bodyFunc}
       }
       """
+    //def get(key:Key) = {$mapFunc.apply(__self.get(key))}
+    /*
+        object sync {
+        ..${bodyFunc}
+        }
+     */
+    val syncFunc =
+      q"""
+          def sync = new Sync
 
-    val syncFunc = q"val sync = new Sync"
-    val result = classWithFunc(annottees.head.tree, List(
-      __self, syncClass, syncFunc
-    ))
-    println(showCode(
+      """
+//    val result = classWithFunc(annottees.head.tree, List(
+//      __self//,syncClass//, syncFunc
+//    )++ bodyFunc)
+
+    val result = annottees.head.tree match {
+      case q"$mod trait $name[..$t] extends ..$base {..$body}"=>
+        q"""
+            $mod trait $name[..$t] extends ..$base {
+
+            ..$body
+            ${__self}
+            ..${bodyFunc}
+            }
+            """
+    }
+    showInfo(show(
       result
     ))
 

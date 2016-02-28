@@ -5,29 +5,40 @@ import scala.concurrent.{Await, Future}
 /**
   * Created by yujieshui on 2016/2/23.
   */
-package a{
+package a {
+
   object AF {
     def apply[T](future: Future[T]) = Await.result(future, scala.concurrent.duration.Duration.Inf)
+
+    def apply[T](t: T) = t
   }
+
 }
 
-
-@SyncApi(a.AF)
-class SyncApiUsing[T] {
-  def f(iiii: Int) = Future.successful("hello")
-
-  private def fff = Future.successful(1)
+trait A[Key,Value]{
+  def f (key: Key):Future[Value]
 }
-@SyncApi(a.AF)
-trait AAA[Key,Value]{
-  def f(iiii: Int) = Future.successful("hello")
+trait B{
+
+}
+
+trait SyncApiUsing[T] {
+  def f(iiii: Int): Future[Int]
+}
+
+//@SyncApi(a.AF)
+trait AAA[Key, Value] {
   def get(key: Key): Future[Option[Value]]
+
 }
 
 object M {
   def main(args: Array[String]) {
-    println(new SyncApiUsing().sync.f(11))
-    println(new SyncApiUsing().sync.f(11))
+    val a = new AAA[Int,Int] {
+      override def get(key: Int): Future[Option[Int]] = Future.successful(Some(1))
+    }
+//    println(new SyncApiUsing().sync.f(11))
+//    println(new SyncApiUsing().sync.f(11))
   }
 
 }

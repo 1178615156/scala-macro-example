@@ -20,7 +20,7 @@ object BuildSettings {
   val resolversSetting = NexusConf.nexusResolvers
   val publishSetting   = NexusConf.publishSetting
 
-  val paradiseVersion = "2.1.0-M5"
+  val paradiseVersion = "2.1.0"
 
   val macrosSetting = Seq(
     crossScalaVersions := Seq("2.10.2", "2.10.3", "2.10.4", "2.10.5", "2.11.0", "2.11.1", "2.11.2", "2.11.3", "2.11.4", "2.11.5", "2.11.6"),
@@ -37,7 +37,7 @@ object BuildSettings {
     version := "1.0-SNAPSHOT",
     scalaVersion := "2.11.6",
     //    organization := "com.yjs"
-    organization := "com.wecash.financal"
+    organization := "com"
   )
 
   val scalaOptionSetting = scalacOptions ++= Seq(

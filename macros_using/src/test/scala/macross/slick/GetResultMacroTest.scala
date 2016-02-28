@@ -10,6 +10,14 @@ class GetResultMacroTest {
 
   import slick.driver.MySQLDriver.api._
 
+  /**
+    * {{{
+    *    case class Address(street: String, city: String, code: Option[Int])
+    *    implicit val implicitGetResultAddress  = GetResult.reads[Address]
+    * }}}
+    */
+
+
   case class Address(street: String, city: String, code: Option[Int])
 
   case class User(id: Long, name: String, age: Option[Int], address: Address /*, address2: Option[Address]*/)
