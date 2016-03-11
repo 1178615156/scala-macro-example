@@ -1,3 +1,4 @@
+/project/BuildSettings.scala
 *.class
 *.log
 .project/NexusConf.scala
