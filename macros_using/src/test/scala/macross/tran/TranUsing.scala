@@ -69,5 +69,5 @@ object TranUsing extends App {
   /// with tranTo
 Some(Some(1)).tranTo[Option[Int]]
 
-  List(DBIO.from(Future(1))).tranTo[DBIO[List[Int]]]
+//  List(DBIO.from(Future(1))).tranTo[DBIO[List[Int]]]
 }

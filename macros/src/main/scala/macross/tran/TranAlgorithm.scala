@@ -12,10 +12,10 @@ trait TranAlgorithm {
   type TypeList = List[Type]
   type ExprTree
 
-  def >:>(l: TypeList, r: TypeList): Boolean
+  def >:> (l: TypeList, r: TypeList): Boolean
 
   implicit class With_<:<(val l: TypeList) {
-    def >:>(r: TypeList) = self.>:>(l, r)
+    def >:> (r: TypeList) = self.>:>(l, r)
   }
 
   case class Replace(from: List[Type], to: List[Type], func: ExprTree => ExprTree)
@@ -23,6 +23,7 @@ trait TranAlgorithm {
   val replaceRule: List[Replace]
 
   /** list triangle
+    *
     * @example :see[[macross.tran.TranAlgorithmTest]]
     * @param list
     * @return
@@ -80,7 +81,7 @@ trait TranMacroInstance extends TranAlgorithm {
   type Type = c.universe.Type
   type ExprTree = c.universe.Tree
 
-  def >:>(l: TypeList, r: TypeList): Boolean = {
+  def >:> (l: TypeList, r: TypeList): Boolean = {
     if (l.isEmpty && r.isEmpty)
       true
     else if (l.size != r.size)
@@ -93,6 +94,7 @@ trait TranMacroInstance extends TranAlgorithm {
 
 }
 
+@deprecated
 trait TranRule {
   self: TranAlgorithm with TranMacroInstance ⇒
 
@@ -100,8 +102,8 @@ trait TranRule {
 
   lazy val option: Type = c.typeOf[Option[_]].typeConstructor
   lazy val future: Type = c.typeOf[Future[_]].typeConstructor
-  lazy val list: Type = c.typeOf[List[_]].typeConstructor
-  lazy val dbio: Type = c.typeOf[slick.dbio.DBIOAction[_, _, _]].typeConstructor
+  lazy val list  : Type = c.typeOf[List[_]].typeConstructor
+  lazy val dbio  : Type = c.typeOf[slick.dbio.DBIOAction[_, _, _]].typeConstructor
 
   lazy val replaceRule: List[Replace] = List(
     Replace(List(option, option), List(option), (i: ExprTree) => q"$i.flatten"),
@@ -112,8 +114,30 @@ trait TranRule {
   )
 }
 
+trait TranRuleOfTranConfig {
+  self: TranAlgorithm with TranMacroInstance with macross.base.TypeArgsList ⇒
+  def tranConfig: c.Expr[TranConfig]
+
+  import c.universe._
+
+  lazy val replaceRule: List[Replace] =
+    tranConfig.tree.symbol.typeSignature.members
+      .map(e => e.name.toTermName -> e.info.typeConstructor)
+      .filter { case (name, info) => info.contains(symbolOf[TranMethod[_, _]]) }
+      .map { case (name, info) =>
+        val tm: List[c.universe.Type] = info.baseType(symbolOf[TranMethod[_, _]]).typeArgs
+
+        Replace(
+          getTypeList(tm.head).reverse.tail.reverse,
+          getTypeList(tm.tail.head).reverse.tail.reverse,
+          e => q""" $tranConfig.$name.apply($e) """
+        )
+      }.toList
+}
+
+
 trait TranExe extends macross.base.ShowInfo {
-  self: TranAlgorithm with TranMacroInstance with TranRule ⇒
+  self: TranAlgorithm with TranMacroInstance ⇒
 
   import c.universe._
 
