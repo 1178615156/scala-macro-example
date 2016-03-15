@@ -36,9 +36,7 @@ object BuildSettings {
   val infoSetting = Seq(
     version := "1.0-SNAPSHOT",
     scalaVersion := "2.11.6",
-    //    organization := "com.yjs"
-    //    organization := "com"
-    organization := "com.wecash.financal"
+    organization := "com.yujieshui"
 
   )
 
