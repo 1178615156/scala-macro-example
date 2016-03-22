@@ -11,15 +11,6 @@ macros_using is example
   //lazy val `your project` = Project(...).dependsOn(`scala-macro-example`)
 ```
 
-```
-play url annotation     make routes from annotation 
-tran                    auto type tran
-slick sort by name      slick sort by name
-get public val          collect public val to list and map
-make get set            using macro annotation make get set method 
-make constructor        using macro annotation make no args constructor
-
-```
 #### play url annotation
 ```scala
 import yjs.annotation.Routes._
