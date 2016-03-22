@@ -79,3 +79,35 @@ like follow
     val map: Map[String, Int] = GetPublicValMacros.mapValue[Module_1.type, Int]//Map(c -> 3, b -> 2, a -> 1)
   }
 ```
+
+#### using macro annotation make get set method 
+use like
+```scala
+  @MakeGetSet
+  case class Module(
+                     i: Int = 2,
+                     s: String,
+                     o: Option[String],
+                     n: Option[AnyRef] = None
+                     )
+
+  val a = new Module(s = "sss", o = Some("option"))
+  println(a.getI)//2
+  println(a.getO)//option
+  println(a.getN)//null
+```
+
+#### make-no-args-constructor
+use like follow 
+```scala
+  @MakeGetSet
+  @MakeNoArgsConstructorMacros
+  case class Module(
+                    i: Int, 
+                    s: String)
+
+  val m = new Module()
+  println(m.getI) //0
+  println(m.getS) //null
+```
+
