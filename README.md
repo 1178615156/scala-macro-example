@@ -1,25 +1,10 @@
 # scala-macro-example
 
-macros is macro impl
-
-macros_using is example
-
- add the following to your build 
 ```scala 
   lazy val `scala-macro-example` =
     ProjectRef( uri("git:https://github.com/1178615156/scala-macro-example"),"scala-macro-example")
-  //lazy val `your project` = Project(...).dependsOn(`scala-macro-example`)
 ```
 
-```
-play url annotation     make routes from annotation 
-tran                    auto type tran
-slick sort by name      slick sort by name
-get public val          collect public val to list and map
-make get set            using macro annotation make get set method 
-make constructor        using macro annotation make no args constructor
-
-```
 #### play url annotation
 ```scala
 import yjs.annotation.Routes._
@@ -94,35 +79,3 @@ like follow
     val map: Map[String, Int] = GetPublicValMacros.mapValue[Module_1.type, Int]//Map(c -> 3, b -> 2, a -> 1)
   }
 ```
-
-#### using macro annotation make get set method 
-use like
-```scala
-  @MakeGetSet
-  case class Module(
-                     i: Int = 2,
-                     s: String,
-                     o: Option[String],
-                     n: Option[AnyRef] = None
-                     )
-
-  val a = new Module(s = "sss", o = Some("option"))
-  println(a.getI)//2
-  println(a.getO)//option
-  println(a.getN)//null
-```
-
-#### make-no-args-constructor
-use like follow 
-```scala
-  @MakeGetSet
-  @MakeNoArgsConstructorMacros
-  case class Module(
-                    i: Int, 
-                    s: String)
-
-  val m = new Module()
-  println(m.getI) //0
-  println(m.getS) //null
-```
-
