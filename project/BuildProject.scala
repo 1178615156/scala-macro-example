@@ -1,6 +1,6 @@
 import sbt._
 import Keys._
-
+//import bintray._
 
 object BuildProject extends Build {
 

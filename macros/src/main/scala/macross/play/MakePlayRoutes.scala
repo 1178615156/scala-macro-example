@@ -23,6 +23,8 @@ import yjs.annotation.Routes.Path
 
                   }
   *          }}}
+  * set log level
+  * play_routes_annotation.log = "debug"
   *
   */
 class MakePlayRoutes extends StaticAnnotation {
@@ -35,6 +37,14 @@ object MakePlayRoutes {
   def from[T](route_file_path: String): Unit = macro MakePlayRoutesImpl.from[T]
 
 
+}
+
+
+object PlayRoutesAnnotationLogLevel extends Enumeration {
+  val nothing = Value("nothing")
+  val info    = Value("info")
+  val debug   = Value("debug")
+  val all     = Value("all")
 }
 
 class MakePlayRoutesImpl(val c: blackbox.Context)
@@ -63,13 +73,19 @@ class MakePlayRoutesImpl(val c: blackbox.Context)
     }
   }
 
+
+  val logLevel: PlayRoutesAnnotationLogLevel.Value = scala.util.Try(config.getString("play_routes_annotation.log")).map(_.toLowerCase).map {
+    PlayRoutesAnnotationLogLevel.withName
+  }.getOrElse(PlayRoutesAnnotationLogLevel.nothing)
+
   def annotationMakePlayRoutesImpl(annottees: c.Expr[Any]*): c.Tree = {
-    showInfo(show("--in----"))
     val controller: c.universe.Symbol = c.typecheck(annottees.head.tree).symbol
     val controllerPath = getControllerPath(controller)
     controllerPath.foreach(path ⇒ impl(controller, path))
 
-    showInfo(show((q"{..${annottees}}")))
+    if (logLevel == PlayRoutesAnnotationLogLevel.all)
+      showInfo(show((q"{..${annottees}}")))
+
     q"{..$annottees}"
   }
 }
