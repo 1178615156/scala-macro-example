@@ -20,11 +20,10 @@ import yjs.annotation.Routes.Path
                   class Controller {
                     @Get( url = "/hello")
                     def hello = ???
-
                   }
   *          }}}
-  * set log level
-  * play_routes_annotation.log = "debug"
+  *          set log level
+  *          play_routes_annotation.log = "debug"
   *
   */
 class MakePlayRoutes extends StaticAnnotation {
@@ -68,7 +67,7 @@ class MakePlayRoutesImpl(val c: blackbox.Context)
 
   def getControllerPath(controller: Symbol): List[String] = {
     controller.annotations.filter(_.tree.tpe <:< typeOf[Path]).map(_.tree).map {
-      case q"new  ${annotation}(${Literal(Constant(path: String))} )" ⇒ path
+      case q"new  ${annotation}(${Literal(Constant(path: String))} )"       ⇒ path
       case q"new  ${annotation}(path= ${Literal(Constant(path: String))} )" ⇒ path
     }
   }
@@ -79,12 +78,18 @@ class MakePlayRoutesImpl(val c: blackbox.Context)
   }.getOrElse(PlayRoutesAnnotationLogLevel.nothing)
 
   def annotationMakePlayRoutesImpl(annottees: c.Expr[Any]*): c.Tree = {
-    val controller: c.universe.Symbol = c.typecheck(annottees.head.tree).symbol
-    val controllerPath = getControllerPath(controller)
-    controllerPath.foreach(path ⇒ impl(controller, path))
 
-    if (logLevel == PlayRoutesAnnotationLogLevel.all)
-      showInfo(show((q"{..${annottees}}")))
+    val controller: c.universe.Symbol = c.typecheck(annottees.head.tree).symbol
+
+    if (controller.isModule || controller.isModuleClass)
+      c.warning(c.enclosingPosition, s"make play routes annotation not support DI class ${controller}")
+    else {
+      val controllerPath = getControllerPath(controller)
+      controllerPath.foreach(path ⇒ impl(controller, path))
+
+      if (logLevel == PlayRoutesAnnotationLogLevel.all)
+        showInfo(show((q"{..${annottees}}")))
+    }
 
     q"{..$annottees}"
   }
