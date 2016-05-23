@@ -10,19 +10,22 @@ import org.scalatest.FunSuite
 object global_conf {
   val config = ConfigFactory.load()
   @conf
+  @conf_check("application.conf")
   object hello {
     val name = config.getString(auto_conf_path)
   }
 }
 
-@conf
-trait local_conf {
-  val config = ConfigFactory.load()
-  val world  = config.getString(auto_conf_path)
-  class c {
-    val c = config.getString(auto_conf_path)
-  }
-}
+//
+//@conf
+//@conf_check("application.conf")
+//trait local_conf {
+//  val config = ConfigFactory.load()
+//  val world  = config.getString(auto_conf_path)
+//  class c {
+//    val c = config.getString(auto_conf_path)
+//  }
+//}
 
 
 class confTest extends FunSuite{

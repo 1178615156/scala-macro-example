@@ -45,11 +45,6 @@ object BuildSettings {
     "-encoding", "UTF-8",
     "-feature", "-language:_",
     "-target:jvm-1.8"
-    //    "-Xlint", "-unchecked",
-    //      "-Ymacro-debug-lite",
-    //      "-Xexperimental",
-    //      "-Ybackend:GenBCode",
-    //      "-Ydelambdafy:method"
   )
 
   val javacOptionsSetting = javacOptions ++= Seq(
