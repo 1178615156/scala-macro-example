@@ -20,9 +20,10 @@ import yjs.annotation.Routes.Path
                   class Controller {
                     @Get( url = "/hello")
                     def hello = ???
-
                   }
   *          }}}
+  *          set log level
+  *          play_routes_annotation.log = "debug"
   *
   */
 class MakePlayRoutes extends StaticAnnotation {
@@ -35,6 +36,14 @@ object MakePlayRoutes {
   def from[T](route_file_path: String): Unit = macro MakePlayRoutesImpl.from[T]
 
 
+}
+
+
+object PlayRoutesAnnotationLogLevel extends Enumeration {
+  val nothing = Value("nothing")
+  val info    = Value("info")
+  val debug   = Value("debug")
+  val all     = Value("all")
 }
 
 class MakePlayRoutesImpl(val c: blackbox.Context)
@@ -58,18 +67,30 @@ class MakePlayRoutesImpl(val c: blackbox.Context)
 
   def getControllerPath(controller: Symbol): List[String] = {
     controller.annotations.filter(_.tree.tpe <:< typeOf[Path]).map(_.tree).map {
-      case q"new  ${annotation}(${Literal(Constant(path: String))} )" ⇒ path
+      case q"new  ${annotation}(${Literal(Constant(path: String))} )"       ⇒ path
       case q"new  ${annotation}(path= ${Literal(Constant(path: String))} )" ⇒ path
     }
   }
 
-  def annotationMakePlayRoutesImpl(annottees: c.Expr[Any]*): c.Tree = {
-    showInfo(show("--in----"))
-    val controller: c.universe.Symbol = c.typecheck(annottees.head.tree).symbol
-    val controllerPath = getControllerPath(controller)
-    controllerPath.foreach(path ⇒ impl(controller, path))
 
-    showInfo(show((q"{..${annottees}}")))
+  val logLevel: PlayRoutesAnnotationLogLevel.Value = scala.util.Try(config.getString("play_routes_annotation.log")).map(_.toLowerCase).map {
+    PlayRoutesAnnotationLogLevel.withName
+  }.getOrElse(PlayRoutesAnnotationLogLevel.nothing)
+
+  def annotationMakePlayRoutesImpl(annottees: c.Expr[Any]*): c.Tree = {
+
+    val controller: c.universe.Symbol = c.typecheck(annottees.head.tree).symbol
+
+    if (controller.isModule || controller.isModuleClass)
+      c.warning(c.enclosingPosition, s"make play routes annotation not support DI class ${controller}")
+    else {
+      val controllerPath = getControllerPath(controller)
+      controllerPath.foreach(path ⇒ impl(controller, path))
+
+      if (logLevel == PlayRoutesAnnotationLogLevel.all)
+        showInfo(show((q"{..${annottees}}")))
+    }
+
     q"{..$annottees}"
   }
 }

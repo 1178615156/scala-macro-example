@@ -7,6 +7,7 @@ import java.io.{File, PrintWriter}
 
 import macross.annotation.base.AnnotationParam
 import macross.base.{ProjectFolder, ShowInfo}
+import macross.play.PlayRoutesAnnotationLogLevel
 import yjs.annotation.Routes._
 
 /**
@@ -19,10 +20,11 @@ case class RouteLine(HttpMethod: String, url: String, codeMethod: String, params
 
 trait MakePlayRoutesMacroImpl
   extends ProjectFolder
-  with ShowInfo
-  with AnnotationParam {
+    with ShowInfo
+    with AnnotationParam {
   val c: blackbox.Context
 
+  def logLevel: PlayRoutesAnnotationLogLevel.Value
 
   import c.universe._
 
@@ -37,19 +39,19 @@ trait MakePlayRoutesMacroImpl
       of.head
   }
 
+  private[this] def annotationAsHttpMethod(tree: Tree) = {
+    tree.tpe <:< typeOf[Get] ||
+      tree.tpe <:< typeOf[Post] ||
+      tree.tpe <:< typeOf[Put] ||
+      tree.tpe <:< typeOf[Delete]
+  }
 
-  def controllerRouteLines(controller: Symbol, path: String): Seq[RouteLine] = {
+  private[this] def controllerRouteLines(controller: Symbol, path: String): Seq[RouteLine] = {
     val controllerMethod =
       controller.typeSignature.members
         .filter(e ⇒ e.annotations.nonEmpty)
-        .map(e ⇒
-          (e, e.annotations.filter(e ⇒
-            e.tree.tpe <:< typeOf[Get] ||
-              e.tree.tpe <:< typeOf[Post] ||
-              e.tree.tpe <:< typeOf[Put] ||
-              e.tree.tpe <:< typeOf[Delete]
-          )
-            ))
+        .map(e ⇒ (e, e.annotations.filter(e ⇒ annotationAsHttpMethod(e.tree)
+        )))
         .filter(_._2.nonEmpty)
     val controllerRouteLines: Seq[RouteLine] = controllerMethod.flatMap {
       case (method: c.universe.Symbol, annotations: List[c.universe.Annotation]) ⇒
@@ -102,12 +104,13 @@ trait MakePlayRoutesMacroImpl
 
     val hasChange = !out.toList.map(_._2).forall(e ⇒ fileRouteLines.contains(e))
 
-    val asDebug = false
-    if (asDebug) {
+    if (logLevel >= PlayRoutesAnnotationLogLevel.debug) {
       showInfo(
         s"""
-           |file      : ${fileRouteLines}
-           |out       : ${out.toList.map(_._2)}
+           |file      :
+           |${fileRouteLines.mkString("\n")}
+           |out       :
+           |${out.toList.map(_._2).mkString("\n")}
            |hasChange : $hasChange
        """.stripMargin)
     }
@@ -122,14 +125,14 @@ trait MakePlayRoutesMacroImpl
       outRoutesFile.print(fileTxt)
       outRoutesFile.close()
 
-      showInfo("routes file = \n" + show(fileTxt))
+      if (logLevel >= PlayRoutesAnnotationLogLevel.info)
+        showInfo("routes file = \n" + show(fileTxt))
     }
 
   }
-  ScopeTag
-//  scala.reflect.internal.Scopes
 
 }
+
 /*
 java.lang.NullPointerException
         at scala.reflect.internal.Scopes$Scope.unlink(Scopes.scala:195)
