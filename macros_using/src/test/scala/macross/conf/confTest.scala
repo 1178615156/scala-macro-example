@@ -13,11 +13,12 @@ object global_conf {
   @ConfCheck("application.conf")
   object hello {
     val name = config.getString(path)
-    val world = config.getLong(path).second
+    val world = config.getLong(path).second.toMillis
   }
+
 }
 
-//
+
 @conf
 @ConfCheck("application.conf")
 trait local_conf {
@@ -27,6 +28,7 @@ trait local_conf {
     val c = config.getString(conf.path)
   }
 }
+
 
 
 class confTest extends FunSuite{

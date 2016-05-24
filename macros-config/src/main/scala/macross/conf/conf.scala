@@ -19,7 +19,7 @@ object conf {
   def path: String = ???
 }
 
-class confImpl(val c: Context) extends macross.base.ShowInfo {
+class confImpl(val c: Context) {
 
   import c.universe._
 
@@ -38,17 +38,17 @@ class confImpl(val c: Context) extends macross.base.ShowInfo {
 
   def replaceMethodPath(tree: Tree, path: TermName, needCheckConfig: List[(Config, String)]): Tree = {
     tree match {
-      case v@q"$a.$f(..$p)" if replacePathMethodName.contains(a.toString()) =>
-        needCheckConfig.foreach { case (config, fileName) => configExistCheck(config, path.toString, fileName) }
-        val log = needCheckConfig.map { case (config, fileName) => fileName + " :" + config.getValue(path.toString).toString }
-        if (log.nonEmpty)
-          c.info(v.pos, log.mkString("\n[", ",", "]"), true)
+      case v@q"$a.$o" if !replacePathMethodName.contains(v.toString()) =>
+        q"${replaceMethodPath(a,path,needCheckConfig)}.$o"
 
+      case q"$a(..$p)" =>
+        q"$a(..${p.map(e => replaceMethodPath(e, path, needCheckConfig))})"
 
-        q"${Literal(Constant(path.toString))}.$f(..$p)"
+      case v@q"$a.$f(..$p)" =>
+        q"${replaceMethodPath(a,path,needCheckConfig)}.$f(..${p.map(e => replaceMethodPath(e, path, needCheckConfig))})"
 
-      case q"$a.$f(..$p)" =>
-        q"$a.$f(..${p.map(e => replaceMethodPath(e, path, needCheckConfig))})"
+      case q"$a(..$p).$other" =>
+        q"$a(..${p.map(e => replaceMethodPath(e, path, needCheckConfig))}).$other"
 
       case v@q"$t" if replacePathMethodName.contains(t.toString()) =>
         needCheckConfig.foreach { case (config, fileName) => configExistCheck(config, path.toString, fileName) }
@@ -76,11 +76,11 @@ class confImpl(val c: Context) extends macross.base.ShowInfo {
 
       case v@q"${mod} val $valueName:${valueType} ={..${body}}" =>
         val confName = TermName(path.toString + "." + valueName.toString())
-        q"$mod val $valueName: $valueType = {..${body.map(e => replaceMethodPath(e, confName,needCheckConfig))}}"
+        q"$mod val $valueName: $valueType = {..${body.map(e => replaceMethodPath(e, confName, needCheckConfig))}}"
 
       case v@q"${mod} def $valueName(...$p):${valueType} ={..${body}}" =>
         val confName = TermName(path.toString + "." + valueName.toString())
-        q"$mod def $valueName(...$p):$valueType ={..${body.map(e => replaceMethodPath(e, confName,needCheckConfig))}}"
+        q"$mod def $valueName(...$p):$valueType ={..${body.map(e => replaceMethodPath(e, confName, needCheckConfig))}}"
 
       case c: ClassDef => replacePath(c, TermName(path + "." + c.name.toString), needCheckConfig)
       case c: ModuleDef => replacePath(c, TermName(path + "." + c.name.toString), needCheckConfig)
@@ -105,6 +105,10 @@ class confImpl(val c: Context) extends macross.base.ShowInfo {
       case e => e
     }
 
+//    c.info(c.enclosingPosition,
+//      showRaw(q"1.toString.toString")
+//      ,true)
+//    c.info(c.enclosingPosition,show(result),true)
     c.Expr(q"..${result}")
   }
 }
