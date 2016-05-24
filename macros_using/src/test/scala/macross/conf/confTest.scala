@@ -1,31 +1,32 @@
 package macross.conf
 
 import com.typesafe.config.ConfigFactory
-import macross.conf.conf.auto_conf_path
+import macross.conf.conf.path
 import org.scalatest.FunSuite
-
+import scala.concurrent.duration._
 /**
   * Created by yujieshui on 2016/5/23.
   */
 object global_conf {
   val config = ConfigFactory.load()
   @conf
-  @conf_check("application.conf")
+  @ConfCheck("application.conf")
   object hello {
-    val name = config.getString(auto_conf_path)
+    val name = config.getString(path)
+    val world = config.getLong(path).second
   }
 }
 
 //
-//@conf
+@conf
 //@conf_check("application.conf")
-//trait local_conf {
-//  val config = ConfigFactory.load()
-//  val world  = config.getString(auto_conf_path)
-//  class c {
-//    val c = config.getString(auto_conf_path)
-//  }
-//}
+trait local_conf {
+  val config = ConfigFactory.load()
+  val world  = config.getString(conf.path)
+  class c {
+    val c = config.getString(conf.path)
+  }
+}
 
 
 class confTest extends FunSuite{
