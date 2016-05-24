@@ -12,7 +12,7 @@ object global_conf {
   @conf
   @ConfCheck("application.conf")
   object hello {
-    val name = config.getString(path)
+    val name = config.getString(path)// == config.getString("hello.name")
     val world = config.getLong(path).second.toMillis
   }
 
