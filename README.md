@@ -4,6 +4,19 @@
   lazy val `scala-macro-example` =
     ProjectRef( uri("git:https://github.com/1178615156/scala-macro-example"),"scala-macro-example")
 ```
+#### conf 
+```scala
+object global_conf {
+  val config = ConfigFactory.load()
+  @conf
+  @ConfCheck("application.conf")
+  object hello {
+    val name = config.getString(path /* == "hello.name" */)
+    val world = config.getLong(path/* == "hello.world" */).second.toMillis
+  }
+
+}
+```
 
 #### play url annotation
 ```scala
