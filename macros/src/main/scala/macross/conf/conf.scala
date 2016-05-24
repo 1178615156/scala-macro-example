@@ -30,22 +30,33 @@ class confImpl(val c: Context) extends macross.base.ShowInfo {
 
   def loadConfig(annotation: List[Tree]): List[(Config, String)] = {
     val fileNames =
-      annotation.filter(e => this.c.typecheck(e.duplicate).tpe <:< typeOf[ConfCheck]).map {
+      annotation.filter(e => c.typecheck(e.duplicate).tpe <:< typeOf[ConfCheck]).map {
         case q"new $name(${Literal(Constant(file: String))})" => file
       }
     fileNames.map(fileName => ConfigFactory.load(this.getClass.getClassLoader, fileName) -> fileName)
   }
 
-  def replaceMethodPath(tree: Tree, real_path: TermName, checkConfig: List[(Config, String)] = Nil): Tree = {
+  def replaceMethodPath(tree: Tree, path: TermName, needCheckConfig: List[(Config, String)]): Tree = {
     tree match {
-      case q"$a.$f(..$p)" if replacePathMethodName.contains(a.toString()) =>
-        q"${Literal(Constant(real_path.toString))}.$f(..$p)"
+      case v@q"$a.$f(..$p)" if replacePathMethodName.contains(a.toString()) =>
+        needCheckConfig.foreach { case (config, fileName) => configExistCheck(config, path.toString, fileName) }
+        val log = needCheckConfig.map { case (config, fileName) => fileName + " :" + config.getValue(path.toString).toString }
+        if (log.nonEmpty)
+          c.info(v.pos, log.mkString("\n[", ",", "]"), true)
+
+
+        q"${Literal(Constant(path.toString))}.$f(..$p)"
 
       case q"$a.$f(..$p)" =>
-        q"$a.$f(..${p.map(e => replaceMethodPath(e, real_path, checkConfig))})"
+        q"$a.$f(..${p.map(e => replaceMethodPath(e, path, needCheckConfig))})"
 
-      case q"$t" if replacePathMethodName.contains(t.toString()) =>
-        Literal(Constant(real_path.toString))
+      case v@q"$t" if replacePathMethodName.contains(t.toString()) =>
+        needCheckConfig.foreach { case (config, fileName) => configExistCheck(config, path.toString, fileName) }
+        val log = needCheckConfig.map { case (config, fileName) => fileName + " :" + config.getValue(path.toString).toString }
+        if (log.nonEmpty)
+          c.info(v.pos, log.mkString("\n[", ",", "]"), true)
+
+        Literal(Constant(path.toString))
 
       case e => e
     }
@@ -62,24 +73,14 @@ class confImpl(val c: Context) extends macross.base.ShowInfo {
         q"def __init__(...$p) ={..$body}"
 
       case e: DefDef if e.name == termNames.CONSTRUCTOR => e
+
       case v@q"${mod} val $valueName:${valueType} ={..${body}}" =>
         val confName = TermName(path.toString + "." + valueName.toString())
-        needCheckConfig.foreach { case (config, fileName) => configExistCheck(config, confName.toString, fileName) }
-
-        val log = needCheckConfig.map { case (config, fileName) => fileName + " :" + config.getValue(confName.toString).toString }
-        if (log.nonEmpty)
-          c.info(v.pos, log.mkString("\n[", ",", "]"), true)
-
-        q"$mod val $valueName: $valueType = {..${body.map(e => replaceMethodPath(e, confName))}}"
+        q"$mod val $valueName: $valueType = {..${body.map(e => replaceMethodPath(e, confName,needCheckConfig))}}"
 
       case v@q"${mod} def $valueName(...$p):${valueType} ={..${body}}" =>
         val confName = TermName(path.toString + "." + valueName.toString())
-        needCheckConfig.foreach { case (config, fileName) => configExistCheck(config, confName.toString, fileName) }
-
-        val log = needCheckConfig.map { case (config, fileName) => fileName + " :" + config.getValue(confName.toString).toString }
-        c.info(v.pos, log.mkString("\n[", ",", "]"), true)
-
-        q"$mod def $valueName(...$p):$valueType ={..${body.map(e => replaceMethodPath(e, confName))}}"
+        q"$mod def $valueName(...$p):$valueType ={..${body.map(e => replaceMethodPath(e, confName,needCheckConfig))}}"
 
       case c: ClassDef => replacePath(c, TermName(path + "." + c.name.toString), needCheckConfig)
       case c: ModuleDef => replacePath(c, TermName(path + "." + c.name.toString), needCheckConfig)

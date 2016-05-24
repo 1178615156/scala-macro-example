@@ -19,7 +19,7 @@ object global_conf {
 
 //
 @conf
-//@conf_check("application.conf")
+@ConfCheck("application.conf")
 trait local_conf {
   val config = ConfigFactory.load()
   val world  = config.getString(conf.path)
