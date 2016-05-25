@@ -46,14 +46,12 @@ class confImpl(val c: Context) {
       case v@q"$a.$o" =>
         q"${replaceConfPath2RealPath(a, path, needCheckConfig)}.$o"
 
-      case q"$a(..$p)" =>
-        q"$a(..${p.map(e => replaceConfPath2RealPath(e, path, needCheckConfig))})"
+      case q"$a(...$p)" =>
+        q"$a(...${p.map(_.map(e => replaceConfPath2RealPath(e, path, needCheckConfig)))})"
 
-      case v@q"$a.$f(..$p)" =>
-        q"${replaceConfPath2RealPath(a, path, needCheckConfig)}.$f(..${p.map(e => replaceConfPath2RealPath(e, path, needCheckConfig))})"
+      case v@q"$a.$f(...$p)" =>
+        q"${replaceConfPath2RealPath(a, path, needCheckConfig)}.$f(...${p.map(_.map(e => replaceConfPath2RealPath(e, path, needCheckConfig)))})"
 
-      case q"$a(..$p).$other" =>
-        q"$a(..${p.map(e => replaceConfPath2RealPath(e, path, needCheckConfig))}).$other"
 
       case e => e
     }

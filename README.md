@@ -4,15 +4,16 @@
   lazy val `scala-macro-example` =
     ProjectRef( uri("git:https://github.com/1178615156/scala-macro-example"),"scala-macro-example")
 ```
-#### conf 
+#### conf parsing config path in complete 
 ```scala
+import macross.conf.conf 
 object global_conf {
   val config = ConfigFactory.load()
   @conf
-  @ConfCheck("application.conf")
+  @ConfCheck("application.conf") // check `application.conf` config resources , exist config path 
   object hello {
-    val name = config.getString(path /* == "hello.name" */)
-    val world = config.getLong(path/* == "hello.world" */).second.toMillis
+    val name = config.getString(conf.path /* == "hello.name" */)
+    val world = config.getLong(conf.path/* == "hello.world" */).second.toMillis
   }
 
 }
