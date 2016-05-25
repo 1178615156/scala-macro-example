@@ -23,11 +23,6 @@ class confImpl(val c: Context) {
 
   import c.universe._
 
-  val replacePathMethodName = List(
-    "conf.path",
-    "path"
-  )
-
   def loadConfig(annotation: List[Tree]): List[(Config, String)] = {
     val fileNames =
       annotation.filter(e => c.typecheck(e.duplicate).tpe <:< typeOf[ConfCheck]).map {
@@ -35,36 +30,35 @@ class confImpl(val c: Context) {
       }
     fileNames.map(fileName => ConfigFactory.load(this.getClass.getClassLoader, fileName) -> fileName)
   }
+  def configExistCheck(config: Config, path: String, fileName: String) =
+    if (!config.hasPath(path.toString))
+      c.error(c.enclosingPosition, s"have not path:${path} in conf file:${fileName}")
 
-  def replaceMethodPath(tree: Tree, path: TermName, needCheckConfig: List[(Config, String)]): Tree = {
+  def replaceConfPath2RealPath(tree: Tree, path: TermName, needCheckConfig: List[(Config, String)]): Tree = {
     tree match {
-      case v@q"$a.$o" if !replacePathMethodName.contains(v.toString()) =>
-        q"${replaceMethodPath(a,path,needCheckConfig)}.$o"
-
-      case q"$a(..$p)" =>
-        q"$a(..${p.map(e => replaceMethodPath(e, path, needCheckConfig))})"
-
-      case v@q"$a.$f(..$p)" =>
-        q"${replaceMethodPath(a,path,needCheckConfig)}.$f(..${p.map(e => replaceMethodPath(e, path, needCheckConfig))})"
-
-      case q"$a(..$p).$other" =>
-        q"$a(..${p.map(e => replaceMethodPath(e, path, needCheckConfig))}).$other"
-
-      case v@q"$t" if replacePathMethodName.contains(t.toString()) =>
+      case v@(q"conf.path" | q"path") =>
         needCheckConfig.foreach { case (config, fileName) => configExistCheck(config, path.toString, fileName) }
         val log = needCheckConfig.map { case (config, fileName) => fileName + " :" + config.getValue(path.toString).toString }
-        if (log.nonEmpty)
-          c.info(v.pos, log.mkString("\n[", ",", "]"), true)
+        if (log.nonEmpty) c.info(v.pos, log.mkString("\n[", ",", "]"), true)
 
         Literal(Constant(path.toString))
+
+      case v@q"$a.$o" =>
+        q"${replaceConfPath2RealPath(a, path, needCheckConfig)}.$o"
+
+      case q"$a(..$p)" =>
+        q"$a(..${p.map(e => replaceConfPath2RealPath(e, path, needCheckConfig))})"
+
+      case v@q"$a.$f(..$p)" =>
+        q"${replaceConfPath2RealPath(a, path, needCheckConfig)}.$f(..${p.map(e => replaceConfPath2RealPath(e, path, needCheckConfig))})"
+
+      case q"$a(..$p).$other" =>
+        q"$a(..${p.map(e => replaceConfPath2RealPath(e, path, needCheckConfig))}).$other"
 
       case e => e
     }
   }
 
-  def configExistCheck(config: Config, path: String, fileName: String) =
-    if (!config.hasPath(path.toString))
-      c.error(c.enclosingPosition, s"have not path:${path} in conf file:${fileName}")
 
 
   def makeNewBody(oldBody: List[Tree], path: TermName, needCheckConfig: List[(Config, String)]) = {
@@ -76,13 +70,13 @@ class confImpl(val c: Context) {
 
       case v@q"${mod} val $valueName:${valueType} ={..${body}}" =>
         val confName = TermName(path.toString + "." + valueName.toString())
-        q"$mod val $valueName: $valueType = {..${body.map(e => replaceMethodPath(e, confName, needCheckConfig))}}"
+        q"$mod val $valueName: $valueType = {..${body.map(e => replaceConfPath2RealPath(e, confName, needCheckConfig))}}"
 
       case v@q"${mod} def $valueName(...$p):${valueType} ={..${body}}" =>
         val confName = TermName(path.toString + "." + valueName.toString())
-        q"$mod def $valueName(...$p):$valueType ={..${body.map(e => replaceMethodPath(e, confName, needCheckConfig))}}"
+        q"$mod def $valueName(...$p):$valueType ={..${body.map(e => replaceConfPath2RealPath(e, confName, needCheckConfig))}}"
 
-      case c: ClassDef => replacePath(c, TermName(path + "." + c.name.toString), needCheckConfig)
+      case c: ClassDef  => replacePath(c, TermName(path + "." + c.name.toString), needCheckConfig)
       case c: ModuleDef => replacePath(c, TermName(path + "." + c.name.toString), needCheckConfig)
 
     }
@@ -100,15 +94,11 @@ class confImpl(val c: Context) {
 
   def impl(annottees: c.Expr[Any]*): c.Expr[Any] = {
     val result = annottees.map(_.tree).map {
-      case c: ClassDef => replacePath(c, c.name.toTermName, loadConfig(c.mods.annotations))
+      case c: ClassDef  => replacePath(c, c.name.toTermName, loadConfig(c.mods.annotations))
       case c: ModuleDef => replacePath(c, c.name.toTermName, loadConfig(c.mods.annotations))
-      case e => e
+      case e            => e
     }
 
-//    c.info(c.enclosingPosition,
-//      showRaw(q"1.toString.toString")
-//      ,true)
-//    c.info(c.enclosingPosition,show(result),true)
     c.Expr(q"..${result}")
   }
 }

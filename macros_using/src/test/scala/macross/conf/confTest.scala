@@ -8,6 +8,7 @@ import scala.concurrent.duration._
   * Created by yujieshui on 2016/5/23.
   */
 object global_conf {
+
   val config = ConfigFactory.load()
   @conf
   @ConfCheck("application.conf")
