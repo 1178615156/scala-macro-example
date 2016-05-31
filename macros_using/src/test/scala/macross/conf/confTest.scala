@@ -19,7 +19,7 @@ object global_conf {
     val name  = config.getString(path /* == "hello.name" */)
     val world = config.getLong(path /* == "hello.world" */).second.toMillis
     val ss    = conf.as[String]//config.getString("hello.ss")
-    val ll    = conf.as[List[Int]] //config.getIntList("hello.ll")
+    val lll    = conf.as[List[Int]] //config.getIntList("hello.ll")
 
   }
 

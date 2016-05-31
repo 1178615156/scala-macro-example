@@ -35,9 +35,9 @@ class confImpl(val c: Context) {
     fileNames.map(fileName => ConfigFactory.load(this.getClass.getClassLoader, fileName) -> fileName)
   }
 
-  def configExistCheck(config: Config, path: String, fileName: String) =
+  def configExistCheck(config: Config, path: String, fileName: String,pos:Position) =
     if (!config.hasPath(path.toString))
-      c.error(c.enclosingPosition, s"have not path:${path} in conf file:${fileName}")
+      c.abort(pos, s"have not path:${path} in conf file:${fileName}")
 
   def asScalaBuffer(tree: Tree)={
     q"scala.collection.JavaConversions.asScalaBuffer($tree).toList"
@@ -92,7 +92,7 @@ class confImpl(val c: Context) {
   def replaceConfPath2RealPath(tree: Tree, path: TermName, needCheckConfig: List[(Config, String)]): Tree = {
     def f = replaceConfigBase(path, needCheckConfig) andThen { e =>
 
-      needCheckConfig.foreach { case (config, fileName) => configExistCheck(config, path.toString, fileName) }
+      needCheckConfig.foreach { case (config, fileName) => configExistCheck(config, path.toString, fileName,tree.pos) }
       val log = needCheckConfig.map { case (config, fileName) => fileName + " :" + config.getValue(path.toString).toString }
       if (log.nonEmpty) c.info(tree.pos, log.mkString("\n[", ",", "]"), true)
 
