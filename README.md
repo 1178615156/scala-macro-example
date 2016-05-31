@@ -8,12 +8,15 @@
 ```scala
 import macross.conf.conf 
 object global_conf {
-  val config = ConfigFactory.load()
+  implicit val config: Config = ConfigFactory.load()
   @conf
   @ConfCheck("application.conf") // check `application.conf` config resources , exist config path 
   object hello {
-    val name = config.getString(conf.path /* == "hello.name" */)
+    val name  = config.getString(conf.path /* == "hello.name" */)
     val world = config.getLong(conf.path/* == "hello.world" */).second.toMillis
+    val ss    = conf.as[String]//config.getString("hello.ss")
+    val ll    = conf.as[List[Int]] //config.getIntList("hello.ll")
+
   }
 
 }

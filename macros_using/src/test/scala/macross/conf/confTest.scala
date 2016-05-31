@@ -16,10 +16,10 @@ object global_conf {
   @conf
   @ConfCheck("application.conf")
   object hello {
-    val name = config.getString(path /* == "hello.name" */)
-        val world = config.getLong(path/* == "hello.world" */).second.toMillis
-    val ss   = conf.as[String]
-    val ll   = conf.as[List[Int]]
+    val name  = config.getString(path /* == "hello.name" */)
+    val world = config.getLong(path /* == "hello.world" */).second.toMillis
+    val ss    = conf.as[String]//config.getString("hello.ss")
+    val ll    = conf.as[List[Int]] //config.getIntList("hello.ll")
 
   }
 
