@@ -17,6 +17,10 @@ class conf extends StaticAnnotation {
 
 object conf {
   def path: String = ???
+
+  def as[T](implicit config: Config): T = ???
+
+  def replace[T](f: Config => T)(implicit config: Config) = f(config)
 }
 
 class confImpl(val c: Context) {
@@ -30,18 +34,75 @@ class confImpl(val c: Context) {
       }
     fileNames.map(fileName => ConfigFactory.load(this.getClass.getClassLoader, fileName) -> fileName)
   }
+
   def configExistCheck(config: Config, path: String, fileName: String) =
     if (!config.hasPath(path.toString))
       c.error(c.enclosingPosition, s"have not path:${path} in conf file:${fileName}")
 
-  def replaceConfPath2RealPath(tree: Tree, path: TermName, needCheckConfig: List[(Config, String)]): Tree = {
-    tree match {
-      case v@(q"conf.path" | q"path") =>
-        needCheckConfig.foreach { case (config, fileName) => configExistCheck(config, path.toString, fileName) }
-        val log = needCheckConfig.map { case (config, fileName) => fileName + " :" + config.getValue(path.toString).toString }
-        if (log.nonEmpty) c.info(v.pos, log.mkString("\n[", ",", "]"), true)
+  def asScalaBuffer(tree: Tree)={
+    q"scala.collection.JavaConversions.asScalaBuffer($tree).toList"
+  }
+  def replaceConfigBase(path: TermName, needCheckConfig: List[(Config, String)]): PartialFunction[Tree, Tree] = {
+    case v@q"conf.as[String](...$p)" =>
+      q"conf.replace[String](_.getString(${Literal(Constant(path.toString))}))"
 
-        Literal(Constant(path.toString))
+    case q"conf.as[Int](...$p)"      =>
+      q"conf.replace[Int](_.getInt(${Literal(Constant(path.toString))}))"
+
+    case q"conf.as[Boolean](...$p)"  =>
+      q"conf.replace[Boolean](_.getBoolean(${Literal(Constant(path.toString))}))"
+
+    case q"conf.as[Long](...$p)"  =>
+      q"conf.replace[Long](_.getLong(${Literal(Constant(path.toString))}))"
+
+    case q"conf.as[Long](...$p)"  =>
+      q"conf.replace[Long](_.getLong(${Literal(Constant(path.toString))}))"
+
+    case q"conf.as[Double](...$p)"  =>
+      q"conf.replace[Double](_.getDouble(${Literal(Constant(path.toString))}))"
+
+    case q"conf.as[Config](...$p)"  =>
+      q"conf.replace[Config](_.getConfig(${Literal(Constant(path.toString))}))"
+
+
+
+    case q"conf.as[List[Config]](...$p)"  =>
+        q"conf.replace[List[Config]](e=>${asScalaBuffer(q"e.getList(${Literal(Constant(path.toString))})")})"
+
+    case q"conf.as[List[Int]](...$p)"      =>
+      q"conf.replace[List[Int]](e=>${asScalaBuffer(q"e.getIntList(${Literal(Constant(path.toString))})")}.map(_.toInt))"
+
+    case q"conf.as[List[Boolean]](...$p)"  =>
+      asScalaBuffer(
+        q"conf.replace[List[Boolean]](_.getBooleanList(${Literal(Constant(path.toString))}).map(_.toBoolean))"
+      )
+    case q"conf.as[List[Long]](...$p)"  =>
+      asScalaBuffer(
+        q"conf.replace[List[Long]](_.getLongList(${Literal(Constant(path.toString))}).map(_.toLong))"
+      )
+    case q"conf.as[List[Double]](...$p)"  =>
+      asScalaBuffer(
+        q"conf.replace[List[Double]](_.getDoubleList(${Literal(Constant(path.toString))}).map(_.toDouble))"
+      )
+    case v@q"conf.as[List[String]](...$p)" =>
+      asScalaBuffer(
+        q"conf.replace[List[String]](_.getStringList(${Literal(Constant(path.toString))}).map(_.toString))"
+      )
+
+    case v@(q"conf.path" | q"path") =>
+      Literal(Constant(path.toString))
+
+  }
+
+  def replaceConfPath2RealPath(tree: Tree, path: TermName, needCheckConfig: List[(Config, String)]): Tree = {
+    def f = replaceConfigBase(path, needCheckConfig) andThen { e =>
+
+      needCheckConfig.foreach { case (config, fileName) => configExistCheck(config, path.toString, fileName) }
+      val log = needCheckConfig.map { case (config, fileName) => fileName + " :" + config.getValue(path.toString).toString }
+      if (log.nonEmpty) c.info(tree.pos, log.mkString("\n[", ",", "]"), true)
+
+      e
+    } orElse[Tree, Tree] {
 
       case v@q"$a.$o" =>
         q"${replaceConfPath2RealPath(a, path, needCheckConfig)}.$o"
@@ -55,8 +116,10 @@ class confImpl(val c: Context) {
 
       case e => e
     }
-  }
 
+    f(tree)
+
+  }
 
 
   def makeNewBody(oldBody: List[Tree], path: TermName, needCheckConfig: List[(Config, String)]) = {
@@ -66,7 +129,7 @@ class confImpl(val c: Context) {
 
       case e: DefDef if e.name == termNames.CONSTRUCTOR => e
 
-      case v@q"${mod} val $valueName:${valueType} ={..${body}}" =>
+      case q"${mod} val $valueName:${valueType} ={..${body}}" =>
         val confName = TermName(path.toString + "." + valueName.toString())
         q"$mod val $valueName: $valueType = {..${body.map(e => replaceConfPath2RealPath(e, confName, needCheckConfig))}}"
 
@@ -96,7 +159,6 @@ class confImpl(val c: Context) {
       case c: ModuleDef => replacePath(c, c.name.toTermName, loadConfig(c.mods.annotations))
       case e            => e
     }
-
     c.Expr(q"..${result}")
   }
 }
