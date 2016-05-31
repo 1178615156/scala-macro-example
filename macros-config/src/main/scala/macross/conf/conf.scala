@@ -73,21 +73,16 @@ class confImpl(val c: Context) {
       q"conf.replace[List[Int]](e=>${asScalaBuffer(q"e.getIntList(${Literal(Constant(path.toString))})")}.map(_.toInt))"
 
     case q"conf.as[List[Boolean]](...$p)"  =>
-      asScalaBuffer(
-        q"conf.replace[List[Boolean]](_.getBooleanList(${Literal(Constant(path.toString))}).map(_.toBoolean))"
-      )
+        q"conf.replace[List[Boolean]](e=>${asScalaBuffer(q"e.getBooleanList(${Literal(Constant(path.toString))})")}.map(_.toBoolean))"
+
     case q"conf.as[List[Long]](...$p)"  =>
-      asScalaBuffer(
-        q"conf.replace[List[Long]](_.getLongList(${Literal(Constant(path.toString))}).map(_.toLong))"
-      )
+        q"conf.replace[List[Long]](e=>${asScalaBuffer(q"e.getLongList(${Literal(Constant(path.toString))})")}.map(_.toLong))"
+
     case q"conf.as[List[Double]](...$p)"  =>
-      asScalaBuffer(
-        q"conf.replace[List[Double]](_.getDoubleList(${Literal(Constant(path.toString))}).map(_.toDouble))"
-      )
+        q"conf.replace[List[Double]](e=>${asScalaBuffer(q"e.getDoubleList(${Literal(Constant(path.toString))})")}.map(_.toDouble))"
+
     case v@q"conf.as[List[String]](...$p)" =>
-      asScalaBuffer(
-        q"conf.replace[List[String]](_.getStringList(${Literal(Constant(path.toString))}).map(_.toString))"
-      )
+        q"conf.replace[List[String]](e=>${asScalaBuffer(q"e.getStringList(${Literal(Constant(path.toString))})")}.map(_.toString))"
 
     case v@(q"conf.path" | q"path") =>
       Literal(Constant(path.toString))
