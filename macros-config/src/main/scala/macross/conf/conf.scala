@@ -37,7 +37,12 @@ class confImpl(val c: Context) {
 
   def configExistCheck(config: Config, path: String, fileName: String,pos:Position) =
     if (!config.hasPath(path.toString))
-      c.abort(pos, s"have not path:${path} in conf file:${fileName}")
+      c.warning(pos, s"have not path:${path} in conf file:${fileName}")
+    else
+      c.echo(pos,fileName + ":" + config.getValue(path).toString)
+//  val log = needCheckConfig.map { case (config, fileName) => fileName + " :" + config.getValue(path.toString).toString }
+//  if (log.nonEmpty) c.info(tree.pos, log.mkString("\n[", ",", "]"), true)
+
 
   def asScalaBuffer(tree: Tree)={
     q"scala.collection.JavaConversions.asScalaBuffer($tree).toList"
@@ -93,9 +98,6 @@ class confImpl(val c: Context) {
     def f = replaceConfigBase(path, needCheckConfig) andThen { e =>
 
       needCheckConfig.foreach { case (config, fileName) => configExistCheck(config, path.toString, fileName,tree.pos) }
-      val log = needCheckConfig.map { case (config, fileName) => fileName + " :" + config.getValue(path.toString).toString }
-      if (log.nonEmpty) c.info(tree.pos, log.mkString("\n[", ",", "]"), true)
-
       e
     } orElse[Tree, Tree] {
 
