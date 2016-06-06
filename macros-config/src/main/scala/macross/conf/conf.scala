@@ -14,7 +14,7 @@ class ConfCheck(val file: String) extends Annotation
 class conf extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro confImpl.impl
 }
-
+//todo super val x = new {...}
 object conf {
   def path: String = ???
 
