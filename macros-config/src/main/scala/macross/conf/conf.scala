@@ -125,7 +125,7 @@ class confImpl(val c: Context) {
 
   def makeNewBody(oldBody: List[Tree], path: TermName, needCheckConfig: List[(Config, String)]) = {
     oldBody.map {
-      case q"$mod def $$ init$$(...$p) = {..$body}" =>
+      case q"$mod def $$init$$(...$p) = {..$body}" =>
         q"def __init__(...$p) ={..$body}"
 
       case e: DefDef if e.name == termNames.CONSTRUCTOR => e

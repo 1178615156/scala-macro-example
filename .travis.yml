@@ -1,0 +1,16 @@
+test:
+  script:
+    - sbt clean coverage test coverageReport
+#
+#build:
+#  script:
+#    - sbt clean
+#    - sbt update
+#    - sbt "test:compile"
+#test:
+#  script:
+#    - sbt clean
+#    - sbt update
+#    - sbt "testOnly proxy.pool.MainTest"
+##    - sbt clean coverage test coverageReport
+#
