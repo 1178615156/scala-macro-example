@@ -10,7 +10,6 @@ import macross.conf.conf
 object global_conf {
   implicit val config: Config = ConfigFactory.load()
   @conf
-  @ConfCheck("application.conf") // check `application.conf` config resources , exist config path 
   object hello {
     val name  = config.getString(conf.path /* == "hello.name" */)
     val world = config.getLong(conf.path/* == "hello.world" */).second.toMillis
