@@ -12,12 +12,12 @@ def scalaMeta = Seq(
   libraryDependencies += "org.scalameta" %% "scalameta" % "1.0.0"
 )
 def options = Seq(
-  javacOptions ++= Seq("-encoding", "UTF-8"),
-  scalacOptions ++= Seq("-encoding", "UTF-8"),
-  scalacOptions ++= Seq("-feature", "-language:_"),
-  scalacOptions ++= Seq("-Xlint", "-unchecked"),
-  scalacOptions ++= Seq("-deprecation"),
-  scalacOptions ++= Seq("-target:jvm-1.8")
+  javacOptions ++= Seq("-encoding", "UTF-8")
+  , scalacOptions ++= Seq("-encoding", "UTF-8")
+  , scalacOptions ++= Seq("-feature", "-language:_")
+  , scalacOptions ++= Seq("-Xlint", "-unchecked")
+  , scalacOptions ++= Seq("-deprecation")
+//  , scalacOptions ++= Seq("-target:jvm-1.8")
   //scalacOptions ++= List("-Ybackend:GenBCode", "-Ydelambdafy:method", "-target:jvm-1.8")
 )
 
