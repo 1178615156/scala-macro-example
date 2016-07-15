@@ -40,11 +40,16 @@ def publishSetting = {
 lazy val `macros-config` = (project in file("./macros-config"))
   .settings(info ++ publishSetting ++ scalaMeta ++ testLib)
 
+lazy val `macros-play` = (project in file("./macros-play"))
+  .settings(info ++ publishSetting ++ scalaMeta ++ testLib)
+
 lazy val `macros-test` = (project in file("./macros-test"))
   .settings(info ++ unPublish ++ scalaMeta ++ testLib ++ credentialSetting)
   .dependsOn(`macros-config`)
+  .dependsOn(`macros-play`)
 
 lazy val root = (project in file("."))
   .settings(info ++ unPublish ++ scalaMeta ++ credentialSetting)
   .dependsOn(`macros-config`).aggregate(`macros-config`)
   .dependsOn(`macros-test`).aggregate(`macros-test`)
+  .dependsOn(`macros-play`).aggregate(`macros-play`)
