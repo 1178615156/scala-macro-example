@@ -8,8 +8,9 @@ def info = Seq(
 
 
 def scalaMeta = Seq(
-  addCompilerPlugin("org.scalamacros" % "paradise" % "3.0.0-M3" cross CrossVersion.full),
-  libraryDependencies += "org.scalameta" %% "scalameta" % "1.0.0"
+//  resolvers += Resolver sonatypeRepo "snapshots",
+  addCompilerPlugin("org.scalamacros" % "paradise" % "3.0.0-SNAPSHOT" cross CrossVersion.full),
+  libraryDependencies += "org.scalameta" %% "scalameta" % "1.1.0-SNAPSHOT"
 )
 def options = Seq(
   javacOptions ++= Seq("-encoding", "UTF-8")
@@ -17,7 +18,7 @@ def options = Seq(
   , scalacOptions ++= Seq("-feature", "-language:_")
   , scalacOptions ++= Seq("-Xlint", "-unchecked")
   , scalacOptions ++= Seq("-deprecation")
-//  , scalacOptions ++= Seq("-target:jvm-1.8")
+  //  , scalacOptions ++= Seq("-target:jvm-1.8")
   //scalacOptions ++= List("-Ybackend:GenBCode", "-Ydelambdafy:method", "-target:jvm-1.8")
 )
 
