@@ -15,9 +15,8 @@ object conf {
 
   def replace[T](f: Config => T)(implicit config: Config) = f(config)
 
-  def asScalaBuffer(tree: Term): Term = {
+  def asScalaBuffer(tree: Term): Term =
     q"scala.collection.JavaConversions.asScalaBuffer($tree).toList"
-  }
 
   def replace_method_body(body: Tree, path: String): Term = body match {
     case q"conf.as[Int]"     => q"conf.replace[Int](_.getInt($path))"
@@ -32,15 +31,13 @@ object conf {
     case q"conf.as[List[Boolean]]" => q"conf.replace[List[Boolean]](e=>${asScalaBuffer(q"e.getBoolList($path)")}.map(_.toBoolean))"
     case q"conf.as[List[Long]]"    => q"conf.replace[List[Long]](e=>${asScalaBuffer(q"e.getLongList($path)")}.map(_.toLong))"
     case q"conf.as[List[Double]]"  => q"conf.replace[List[Double]](e=>${asScalaBuffer(q"e.getDoubleList($path)")}.map(_.toDouble))"
-    case q"conf.as[List[Config]]"  => q"conf.replace[List[Config]](e=>${asScalaBuffer(q"e.getConfigList($path)")}.map(_.toConfig))"
+    case q"conf.as[List[Config]]"  => q"conf.replace[List[Config]](e=>${asScalaBuffer(q"e.getConfigList($path)")})"
 
     case q"$a.$b"       => q"${replace_method_body(a, path)}.$b"
     case q"$a(..$p)"    => q"$a(..${p.map(e => replace_method_body(e, path))})"
     case q"$a.$f(..$p)" => q"$a.$f(..${p.map(e => replace_method_body(e, path))})"
     case other: Term    => other
-
   }
-
 
   def replace_class(any: Any, path: Option[String]): Stat = any match {
     case x: Def         => x.copy(body = replace_method_body(x.body, path.get + "." + x.name))
@@ -51,15 +48,12 @@ object conf {
     case other: Stat    => other
   }
 
-
 }
 
 import conf._
 
 final class conf extends scala.annotation.StaticAnnotation {
   inline def apply(defn: Any) = meta {
-    val q"object $name {..$body}" = defn
-
     val out = replace_class(defn, None)
     out
   }
