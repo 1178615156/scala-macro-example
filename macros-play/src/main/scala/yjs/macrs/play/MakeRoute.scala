@@ -24,7 +24,6 @@ object MakeRoute {
   def controllerRouteLines(stats: Seq[Stat]) = {
     stats.collect {
       case x: Defn.Def =>
-        println(x.mods)
         x.mods.collect{case Mod.Annot(annot) => annot}
     }
   }
@@ -40,10 +39,11 @@ import MakeRoute._
 
 final class MakeRoute extends scala.annotation.StaticAnnotation {
   inline def apply(defn: Any) = meta {
-//    val out = impl(defn)
-    println(routesFile)
-    println(impl(defn))
-    println(defn)
+    println(this.getClass.getResource("routes"))
+    println(
+      ConfigFactory.load(this.getClass.getClassLoader)
+    )
+    (impl(defn))
     defn
   }
 }
