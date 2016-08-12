@@ -21,7 +21,7 @@ object global_conf {
       |   {b=1}
       | ]
       |}
-      |
+      |abt = 123
     """.stripMargin)
 
   @conf
@@ -41,11 +41,14 @@ object global_conf {
   object world {
     val a = conf.as[List[Config]]
   }
+  @conf
+  val abt = conf.as[Int]
 
 }
 
 
 class confTest extends org.scalatest.FunSuite {
+
 
 
   test("global_conf") {
@@ -55,6 +58,8 @@ class confTest extends org.scalatest.FunSuite {
     val a :: b :: Nil = global_conf.world.a
     assert(a.getInt("a") === 1)
     assert(b.getInt("b") === 1)
+    assert(global_conf.abt === 123)
+    assert(global_conf.abt === 123)
   }
 
 

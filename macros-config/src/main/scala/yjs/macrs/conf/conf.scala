@@ -40,8 +40,8 @@ object conf {
   }
 
   def replace_class(any: Any, path: Option[String]): Stat = any match {
-    case x: Def         => x.copy(body = replace_method_body(x.body, path.get + "." + x.name))
-    case x: Val         => x.copy(rhs = replace_method_body(x.rhs, path.get + "." + x.pats.head))
+    case x: Def         => x.copy(body = replace_method_body(x.body, path.map(_ +".").getOrElse("") + x.name))
+    case x: Val         => x.copy(rhs = replace_method_body(x.rhs, path.map(_ +".").getOrElse("")  + x.pats.head))
     case x: Defn.Trait  => x.copy(templ = x.templ.copy(stats = x.templ.stats.map(_.map(stat => replace_class(stat, Some(path.map(_ + "." + x.name.toString()).getOrElse(x.name.toString())))))))
     case x: Defn.Class  => x.copy(templ = x.templ.copy(stats = x.templ.stats.map(_.map(stat => replace_class(stat, Some(path.map(_ + "." + x.name.toString()).getOrElse(x.name.toString())))))))
     case x: Defn.Object => x.copy(templ = x.templ.copy(stats = x.templ.stats.map(_.map(stat => replace_class(stat, Some(path.map(_ + "." + x.name.toString()).getOrElse(x.name.toString())))))))
