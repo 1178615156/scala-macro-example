@@ -1,7 +1,7 @@
 name := "scala-macro-example"
 
 def info = Seq(
-  version := "2.2.1",
+  version := "2.2.3",
   scalaVersion := "2.11.8",
   organization := "yjs"
 )
@@ -22,10 +22,13 @@ def options = Seq(
   //scalacOptions ++= List("-Ybackend:GenBCode", "-Ydelambdafy:method", "-target:jvm-1.8")
 )
 
+def logDepend = Seq(libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.12")
+
 def testLib = Seq(libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.4" % Test)
 
 def unPublish = Seq(publishArtifact := false, publish := {})
 
+def measureDepend = Seq(libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.7")
 
 lazy val `macros-config` = (project in file("./macros-config"))
   .settings(info ++ scalaMeta ++ testLib)
@@ -33,13 +36,14 @@ lazy val `macros-config` = (project in file("./macros-config"))
 lazy val `macros-play` = (project in file("./macros-play"))
   .settings(info ++ scalaMeta ++ testLib)
 
+lazy val `macros-measure` = (project in file("./macros-measure"))
+  .settings(info ++ scalaMeta ++ testLib ++ measureDepend++ logDepend)
+
 lazy val `macros-test` = (project in file("./macros-test"))
-  .settings(info ++ unPublish ++ scalaMeta ++ testLib)
-  .dependsOn(`macros-config`)
-  .dependsOn(`macros-play`)
+  .settings(info ++ unPublish ++ scalaMeta ++ testLib )
+  .dependsOn(`macros-config`, `macros-measure`, `macros-play`)
 
 lazy val root = (project in file("."))
   .settings(info ++ unPublish ++ scalaMeta)
-  .dependsOn(`macros-config`).aggregate(`macros-config`)
-  .dependsOn(`macros-test`).aggregate(`macros-test`)
-  .dependsOn(`macros-play`).aggregate(`macros-play`)
+  .dependsOn(`macros-config`, `macros-play` ,`macros-measure`, `macros-test`)
+  .aggregate(`macros-config`, `macros-play` ,`macros-measure`, `macros-test`)
