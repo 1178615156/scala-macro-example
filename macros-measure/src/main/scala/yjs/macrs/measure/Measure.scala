@@ -52,5 +52,6 @@ object Measure {
 final class Measure extends scala.annotation.StaticAnnotation {
   inline def apply(defn: Any) = meta {
     Measure.impl(defn)
+    defn
   }
 }

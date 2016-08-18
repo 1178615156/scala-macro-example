@@ -5,14 +5,16 @@ package yjs.macrs.play
   */
 object Routes {
 
-  class Post(val url: String) extends scala.annotation.StaticAnnotation
-
-  class Get(val url: String) extends scala.annotation.StaticAnnotation
-
-  class Delete(val url: String) extends scala.annotation.StaticAnnotation
-
-  class Put(val url: String) extends scala.annotation.StaticAnnotation
-
   class Path(val path: String) extends scala.annotation.StaticAnnotation
+
+  trait Method
+
+  class Get(val url: String) extends scala.annotation.StaticAnnotation with Method
+
+  class Delete(val url: String) extends scala.annotation.StaticAnnotation with Method
+
+  class Put(val url: String) extends scala.annotation.StaticAnnotation with Method
+
+  class Post(val url: String) extends scala.annotation.StaticAnnotation with Method
 
 }
