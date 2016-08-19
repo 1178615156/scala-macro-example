@@ -14,7 +14,7 @@ def info = Seq(
 def scalaMeta = Seq(
   resolvers += Resolver sonatypeRepo "snapshots",
   addCompilerPlugin("org.scalamacros" % "paradise" % "3.0.0-SNAPSHOT" cross CrossVersion.full),
-  libraryDependencies += "org.scalameta" %% "scalameta" % "1.1.0-SNAPSHOT"
+  libraryDependencies ++= Seq("org.scalameta" %% "scalameta" % "1.1.0-SNAPSHOT").map(excludeScalaLib).map(_.withSources())
 )
 
 def excludeScalaLib(l: ModuleID) = l
