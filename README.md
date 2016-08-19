@@ -20,3 +20,44 @@ object global_conf {
 
 }
 ```
+
+#### make play routes
+
+it will auto make conf/routes file 
+
+```scala
+package controllers
+
+import javax.inject.{Inject, Singleton}
+
+import play.api._
+import play.api.mvc._
+import yjs.macrs.play.MakeRoute
+import yjs.macrs.play.Routes._
+
+@MakeRoute
+@Path("/hello")
+@Singleton
+class Application @Inject()
+() extends Controller {
+
+  @Get("/index")
+  @Get("/index2")
+  def index(i:Int,s:String) = Action {
+    Ok("1")
+  }
+
+  @Post("/hello")
+  @Get("/xxx")
+  def hello = Action(Ok("2"))
+
+}
+```
+
+the conf/routes file it like this
+```
+GET     /hello/index   controllers.Application.index(i:Int,s:String)
+GET     /hello/index2  controllers.Application.index(i:Int,s:String)
+POST    /hello/hello   controllers.Application.hello
+GET     /hello/xxx     controllers.Application.hello
+```
