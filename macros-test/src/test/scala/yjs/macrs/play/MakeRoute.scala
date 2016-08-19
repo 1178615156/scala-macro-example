@@ -5,78 +5,22 @@ package yjs.macrs.play
   */
 
 @MakeRoute
-@Routes.Path(path = "aaa/")
-@Routes.Path("bbb/")
+@Routes.Path(path = "/aaa/")
+@Routes.Path("/bbb/")
 class Hello{
   def a = 1
   @Routes.Get(url = "url/b")
   def b =2
 
   @Routes.Post(url ="url/ccc")
+  @Routes.Post(url ="url/cccxxx")
   def c (a:Int,b:String) = "3"
 }
-
 
 
 class MakeRouteTest extends org.scalatest.FunSuite {
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

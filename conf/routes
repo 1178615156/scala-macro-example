@@ -1,0 +1,6 @@
+GET     /aaa/url/b       yjs.macrs.play.Hello.b
+POST    /aaa/url/ccc     yjs.macrs.play.Hello.c(a:Int,b:String)
+POST    /aaa/url/cccxxx  yjs.macrs.play.Hello.c(a:Int,b:String)
+GET     /bbb/url/b       yjs.macrs.play.Hello.b
+POST    /bbb/url/ccc     yjs.macrs.play.Hello.c(a:Int,b:String)
+POST    /bbb/url/cccxxx  yjs.macrs.play.Hello.c(a:Int,b:String)
