@@ -27,16 +27,16 @@ trait AnnotationUtils {
 
   import c.universe._
 
-  def getAnnotation(x: MemberDef) = x.mods.annotations
+  final def getAnnotation(x: MemberDef) = x.mods.annotations
 
-  def getAnnotationValue(tree: Tree): Seq[String] = tree match {
+  final def getAnnotationValue(tree: Tree): Seq[String] = tree match {
     case q"new $name (..$values)" => values collect {
       case AssignOrNamedArg(Ident(TermName(_)), Literal(Constant(s: String))) => s
       case Literal(Constant(s: String))                                       => s
     }
   }
 
-  def getAnnotationName(tree: Tree): String = tree match {
+  final def getAnnotationName(tree: Tree): String = tree match {
     case q"new $name (..$values)" => name.toString().split("\\.").last
   }
 }
@@ -130,7 +130,7 @@ class MakeRouteMacroImpl(override val c: blackbox.Context) extends ProjectProper
           outRoutesFile.print(fileTxt)
           outRoutesFile.close()
           c.echo(c.enclosingPosition,
-            controllerRule.mkString("\n")
+            controllerRule.mkString("\n","\n","\n")
           )
         } else {
           //nothing to do

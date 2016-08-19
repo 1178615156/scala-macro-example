@@ -1,7 +1,7 @@
 name := "scala-macro-example"
 
 def info = Seq(
-  version := "2.2.3",
+  version := "2.3.0-SNAPSHOT",
   scalaVersion := "2.11.8",
   organization := "yjs",
   libraryDependencies ++= Seq(
