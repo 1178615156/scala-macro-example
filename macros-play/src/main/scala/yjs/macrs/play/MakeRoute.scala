@@ -3,43 +3,11 @@ package yjs.macrs.play
 import java.io.{File, PrintWriter}
 
 import com.typesafe.config.ConfigFactory
+import yjs.macrs.common.{AnnotationUtils, ProjectProperty}
 
 import scala.io.Source
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
-
-/**
-  * Created by yuJieShui on 2016/7/15.
-  */
-trait ProjectProperty {
-  val c: scala.reflect.macros.blackbox.Context
-
-  final def config = ConfigFactory.load(getClass.getClassLoader)
-
-  final def projectDir = config.getString("user.dir")
-
-  final def currentPackage = c.internal.enclosingOwner.fullName
-
-}
-
-trait AnnotationUtils {
-  val c: scala.reflect.macros.blackbox.Context
-
-  import c.universe._
-
-  final def getAnnotation(x: MemberDef) = x.mods.annotations
-
-  final def getAnnotationValue(tree: Tree): Seq[String] = tree match {
-    case q"new $name (..$values)" => values collect {
-      case AssignOrNamedArg(Ident(TermName(_)), Literal(Constant(s: String))) => s
-      case Literal(Constant(s: String))                                       => s
-    }
-  }
-
-  final def getAnnotationName(tree: Tree): String = tree match {
-    case q"new $name (..$values)" => name.toString().split("\\.").last
-  }
-}
 
 class MakeRouteMacroImpl(override val c: blackbox.Context) extends ProjectProperty
   with AnnotationUtils {
@@ -108,6 +76,14 @@ class MakeRouteMacroImpl(override val c: blackbox.Context) extends ProjectProper
     other ++ controllerRule
   }
 
+  private def rule2line(rule: Rule,maxUrlSize:Int)={
+    rule.httpMethod +
+      (" " * (8 - rule.httpMethod.size)) +
+      rule.url +
+      (" " * (maxUrlSize - rule.url.size + 2)) +
+      rule.callMethod +
+      rule.params
+  }
   def impl(annottees: Tree*): Tree = {
 
     annottees.foreach {
@@ -117,15 +93,7 @@ class MakeRouteMacroImpl(override val c: blackbox.Context) extends ProjectProper
         if (ruleHasChange(controllerRule, fileRoutesRule)) {
           val finalRules = mergeRule(controllerRule, fileRoutesRule)
           val maxUrlSize = finalRules.map(_.url.length).max
-          val fileTxt = finalRules
-            .map(rule =>
-              rule.httpMethod +
-                (" " * (8 - rule.httpMethod.size)) +
-                rule.url +
-                (" " * (maxUrlSize - rule.url.size + 2)) +
-                rule.callMethod +
-                rule.params
-            ).mkString("\n")
+          val fileTxt = finalRules.map(rule =>rule2line(rule,maxUrlSize)).mkString("\n")
           val outRoutesFile = new PrintWriter(routesFile())
           outRoutesFile.print(fileTxt)
           outRoutesFile.close()

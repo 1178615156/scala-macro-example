@@ -1,13 +1,13 @@
 name := "scala-macro-example"
 
 def info = Seq(
-  version := "2.3.0-SNAPSHOT",
   scalaVersion := "2.11.8",
   organization := "yjs",
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-library" % scalaVersion.value,
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-    "org.scala-lang" % "scala-compiler" % scalaVersion.value
+    "org.scala-lang" % "scala-compiler" % scalaVersion.value,
+    "com.typesafe" % "config" % "1.3.0"
   )
 )
 
@@ -47,14 +47,10 @@ lazy val `macros-common` = (project in file("./macros-common"))
   .settings(info ++ scalaMeta ++ testLib)
 
 lazy val `macros-config` = (project in file("./macros-config"))
-  .settings(info ++ scalaMeta ++ testLib ++ Seq(libraryDependencies ++= Seq(
-    "com.typesafe" % "config" % "1.3.0"
-  )))
+  .settings(info ++ scalaMeta ++ testLib )
 
 lazy val `macros-play` = (project in file("./macros-play"))
-  .settings(info ++ scalaMeta ++ testLib ++ Seq(libraryDependencies ++= Seq(
-    "com.typesafe" % "config" % "1.3.0"
-  ))).dependsOn(`macros-common`)
+  .settings(info ++ scalaMeta ++ testLib ).dependsOn(`macros-common`)
 
 lazy val `macros-measure` = (project in file("./macros-measure"))
   .settings(info ++ scalaMeta ++ testLib ++ measureDepend ++ logDepend)
