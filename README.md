@@ -6,17 +6,19 @@
 ```
 #### conf parsing config path in complete 
 ```scala
-import macross.conf.conf 
+import yjs.macrs.conf.conf
+import com.typesafe.config.Config
 object global_conf {
   implicit val config: Config = ConfigFactory.load()
-  @conf
+  
   object hello {
-    val name  = config.getString(conf.path /* == "hello.name" */)
-    val world = config.getLong(conf.path/* == "hello.world" */).second.toMillis
-    val ss    = conf.as[String]//config.getString("hello.ss")
-    val ll    = conf.as[List[Int]] //config.getIntList("hello.ll")
-
+    val ss    = conf[String]//config.getString("hello.ss")
+    val ll    = conf[List[Int]] //config.getIntList("hello.ll")
+    trait world{
+      val list = conf[List[Config]] //config.getConfigList("hello.world.list")
+    }
   }
+  
 
 }
 ```
