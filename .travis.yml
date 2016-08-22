@@ -3,5 +3,9 @@ scala:
    - 2.11.8
 jdk:
   - oraclejdk8
+cache:
+  directories:
+  - $HOME/.ivy2/cache
+  - $HOME/.sbt/boot/
 test:
   script: sbt ++$TRAVIS_SCALA_VERSION check-gen-type-classes test
