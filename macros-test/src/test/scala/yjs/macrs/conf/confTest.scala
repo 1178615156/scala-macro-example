@@ -49,7 +49,7 @@ object global_conf {
 
 
 }
-
+@conf.Start
 object confApplyTest {
   private implicit val config = ConfigFactory.parseString(
     """

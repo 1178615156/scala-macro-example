@@ -14,12 +14,16 @@ class confApplyImpl(val c: scala.reflect.macros.blackbox.Context)
 
   import c.universe._
 
-  def packageName(x: Symbol): String =
-    if (x.owner.isPackage) x.fullName.toString else packageName(x.owner)
+  private def prefixName(x: Symbol): String =
+    if (x.annotations.exists(e=>c.typecheck(e.tree).tpe <:< typeOf[conf.Start]))
+      x.fullName.toString
+    else if (x.isPackage)
+      c.abort(c.enclosingPosition, "must in conf.Start ")
+    else prefixName(x.owner)
 
   def impl[T](config: c.Expr[Config])(implicit t: c.WeakTypeTag[T]): c.Tree = {
 
-    val configName = ownerName.replace(packageName(c.internal.enclosingOwner), "").tail
+    val configName = ownerName.replace(prefixName(c.internal.enclosingOwner), "").tail
 
     def asScala(tree: Tree): Tree =
       q"scala.collection.JavaConversions.asScalaBuffer($tree).toList"
@@ -39,19 +43,21 @@ class confApplyImpl(val c: scala.reflect.macros.blackbox.Context)
       case x if x <:< typeOf[List[Config]]  => q"${asScala(q"$config.getConfigList($configName)")}"
       case x if x <:< typeOf[List[Long]]    => q"${asScala(q"$config.getLongList($configName)")}.map(_.toLong)"
     }
-    c.echo(c.internal.enclosingOwner.pos,"\n" +  show(configName))
+    c.echo(c.internal.enclosingOwner.pos, "\n" + show(configName))
     out
   }
 }
 
 object conf {
 
+  class Start extends scala.annotation.StaticAnnotation
+
   def apply[T](implicit config: Config): T = macro confApplyImpl.impl[T]
 
   import scala.meta.Defn._
   import scala.meta._
 
-  @deprecated("user conf[Type]","")
+  @deprecated("user conf[Type]", "")
   def as[T](implicit config: Config): T = ???
 
   def replace[T](f: Config => T)(implicit config: Config) = f(config)

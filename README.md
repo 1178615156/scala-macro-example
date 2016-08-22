@@ -5,6 +5,8 @@
 ```scala
 import yjs.macrs.conf.conf
 import com.typesafe.config.Config
+
+@conf.Start //it will no contain global_conf
 object global_conf {
   implicit val config: Config = ConfigFactory.load()
   
