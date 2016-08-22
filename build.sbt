@@ -1,7 +1,7 @@
 name := "scala-macro-example"
 
 def info = Seq(
-  version := "2.3.0-SNAPSHOT",
+  version := "2.3.1",
   scalaVersion := "2.11.8",
   organization := "yjs",
   libraryDependencies ++= Seq(
@@ -13,8 +13,8 @@ def info = Seq(
 
 def scalaMeta = Seq(
   resolvers += Resolver sonatypeRepo "snapshots",
-  addCompilerPlugin("org.scalamacros" % "paradise" % "3.0.0-SNAPSHOT" cross CrossVersion.full),
-  libraryDependencies ++= Seq("org.scalameta" %% "scalameta" % "1.1.0-SNAPSHOT").map(excludeScalaLib).map(_.withSources())
+  addCompilerPlugin("org.scalamacros" % "paradise" % "3.0.0-M3" cross CrossVersion.full),
+  libraryDependencies ++= Seq("org.scalameta" %% "scalameta" % "1.0.0").map(excludeScalaLib).map(_.withSources())
 )
 
 def excludeScalaLib(l: ModuleID) = l

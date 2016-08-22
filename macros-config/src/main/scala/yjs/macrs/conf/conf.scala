@@ -33,10 +33,14 @@ object conf {
     case q"conf.as[List[Double]]"  => q"conf.replace[List[Double]](e=>${asScalaBuffer(q"e.getDoubleList($path)")}.map(_.toDouble))"
     case q"conf.as[List[Config]]"  => q"conf.replace[List[Config]](e=>${asScalaBuffer(q"e.getConfigList($path)")})"
 
-    case q"$a.$b"       => q"${replace_method_body(a, path)}.$b"
-    case q"$a(..$p)"    => q"$a(..${p.map(e => replace_method_body(e, path))})"
-    case q"$a.$f(..$p)" => q"$a.$f(..${p.map(e => replace_method_body(e, path))})"
-    case other: Term    => other
+    case q"$a.$b"       =>
+      q"${replace_method_body(a, path)}.$b"
+    case q"$a(..$p)"    =>
+      q"${replace_method_body(a,path)}(..${p.map(e => replace_method_body(e, path))})"
+    case q"$a.$f(..$p)" =>
+      q"$a.$f(..${p.map(e => replace_method_body(e, path))})"
+    case other: Term    =>
+      other
   }
 
   def replace_class(any: Any, path: Option[String]): Stat = any match {

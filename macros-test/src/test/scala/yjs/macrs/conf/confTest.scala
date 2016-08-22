@@ -37,14 +37,23 @@ object global_conf {
 
   }
 
+
+
+
+
+
   @conf
   object world {
-    val a = conf.as[List[Config]]
+    val a = conf.as[List[Config]].map(e=>e)
   }
+
   @conf
   val abt = conf.as[Int]
 
 }
+
+
+
 
 
 class confTest extends org.scalatest.FunSuite {
