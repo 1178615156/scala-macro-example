@@ -10,7 +10,6 @@ def info = Seq(
     "com.typesafe" % "config" % "1.3.0"
   )
 )
-
 def scalaMeta = Seq(
   resolvers += Resolver sonatypeRepo "snapshots",
   addCompilerPlugin("org.scalamacros" % "paradise" % "3.0.0-M3" cross CrossVersion.full),
@@ -47,7 +46,7 @@ lazy val `macros-common` = (project in file("./macros-common"))
   .settings(info ++ scalaMeta ++ testLib)
 
 lazy val `macros-config` = (project in file("./macros-config"))
-  .settings(info ++ scalaMeta ++ testLib )
+  .settings(info ++ scalaMeta ++ testLib ).dependsOn(`macros-common`)
 
 lazy val `macros-play` = (project in file("./macros-play"))
   .settings(info ++ scalaMeta ++ testLib ).dependsOn(`macros-common`)

@@ -8,10 +8,18 @@ import com.typesafe.config.ConfigFactory
 trait ProjectProperty {
   val c: scala.reflect.macros.blackbox.Context
 
+  import c.universe._
+
   final def config = ConfigFactory.load(getClass.getClassLoader)
 
   final def projectDir = config.getString("user.dir")
 
-  final def currentPackage = c.internal.enclosingOwner.fullName
+  final def getPackage(symbol: Symbol): String =
+    if (symbol.isPackage) symbol.fullName else getPackage(symbol.owner)
+
+  final def currentPackage: String =
+    getPackage(c.internal.enclosingOwner)
+
+  final def ownerName = c.internal.enclosingOwner.fullName
 
 }
