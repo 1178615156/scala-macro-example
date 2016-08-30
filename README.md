@@ -6,15 +6,14 @@
 import yjs.macrs.conf.conf
 import com.typesafe.config.Config
 
-@conf.Start //it will no contain global_conf
 object global_conf {
   implicit val config: Config = ConfigFactory.load()
-  
+  @conf
   object hello {
-    val ss    = conf[String]//config.getString("hello.ss")
-    val ll    = conf[List[Int]] //config.getIntList("hello.ll")
+    val ss    = conf.as[String]//config.getString("hello.ss")
+    val ll    = conf.as[List[Int]] //config.getIntList("hello.ll")
     trait world{
-      val list = conf[List[Config]] //config.getConfigList("hello.world.list")
+      val list = conf.as[List[Config]] //config.getConfigList("hello.world.list")
     }
   }
   
