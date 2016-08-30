@@ -57,7 +57,6 @@ object conf {
   import scala.meta.Defn._
   import scala.meta._
 
-  @deprecated("user conf[Type]", "")
   def as[T](implicit config: Config): T = ???
 
   def replace[T](f: Config => T)(implicit config: Config) = f(config)
