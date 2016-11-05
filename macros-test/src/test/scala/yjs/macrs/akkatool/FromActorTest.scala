@@ -17,6 +17,10 @@ trait Api {
   def ask(i: Int): Future[String]
 
   def ask(hello: Hello): Future[HelloResult]
+
+  def send(s: String): Unit
+
+  def hello = ask(Hello())
 }
 
 object Api {
@@ -33,14 +37,24 @@ object Api {
 }
 
 class FromActorTest extends TestKit(ActorSystem("test")) with WordSpecLike {
+
   "api" must {
     val api = Api.fromActor(testActor)
-    "receive " in {
+    "ask" in {
       api.ask(1)
       expectMsg(1)
       api ask Hello()
       expectMsg(Hello())
     }
+    "send" in {
+      api send "123"
+      expectMsg("123")
+    }
+    "hello " in {
+      api.hello
+      expectMsg(Hello())
+    }
+
   }
 
 

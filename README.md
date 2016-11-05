@@ -1,6 +1,41 @@
 # scala-macro-example
 [![Build Status](https://travis-ci.org/1178615156/scala-macro-example.svg?branch=master)](https://travis-ci.org/1178615156/scala-macro-example)
 
+#### akkatool
+```scala
+trait Api {
+  def ask(i: Int): Future[String]
+
+  def ask(hello: Hello): Future[HelloResult]
+
+  def send(s: String): Unit
+
+  def hello = ask(Hello())
+}
+
+object Api {
+
+  case class Hello()
+
+  case class HelloResult()
+
+  implicit val timeout = Timeout(1.second)
+
+
+  def fromActor(actorRef: ActorRef): Api = FromActor[Api](actorRef)
+  //as 
+  def fromActor(actorRef: ActorRef): Api = new Api{
+    def ask(i: Int): Future[String] = actorRef.ask(i).mapTo[String]
+    def ask(hello: Hello): Future[HelloResult]=actorRef.ask(hello).mapTo[HelloResult]
+    def send(s: String): Unit=actorRef ! s
+  }
+
+}
+
+```
+
+
+
 #### conf parsing config path in complete 
 ```scala
 import yjs.macrs.conf.conf
