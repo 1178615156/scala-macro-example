@@ -1,7 +1,7 @@
 package yjs.macrs.akkatool
 
 import akka.actor.{ActorRef, ActorSystem}
-import org.scalatest.WordSpecLike
+import org.scalatest.{BeforeAndAfterAll, Suite, WordSpecLike}
 import akka.pattern.ask
 import akka.testkit.TestKit
 import akka.util.Timeout
@@ -36,7 +36,18 @@ object Api {
   def fromActor(actorRef: ActorRef): Api = FromActor[Api](actorRef)
 }
 
-class FromActorTest extends TestKit(ActorSystem("test")) with WordSpecLike {
+trait StopSystemAfterAll extends BeforeAndAfterAll {
+  this: Suite with TestKit =>
+  override protected def afterAll(): Unit = {
+    system.terminate()
+  }
+
+}
+
+class FromActorTest
+  extends TestKit(ActorSystem("test"))
+    with WordSpecLike
+    with StopSystemAfterAll {
 
   "api" must {
     val api = Api.fromActor(testActor)
