@@ -15,9 +15,9 @@ class confApplyImpl(val c: scala.reflect.macros.blackbox.Context)
   import c.universe._
 
   private def prefixName(x: Symbol): String =
-    if (x.annotations.exists(e=>c.typecheck(e.tree).tpe <:< typeOf[conf.Start]))
+    if(x.annotations.exists(e => c.typecheck(e.tree).tpe <:< typeOf[conf.Start]))
       x.fullName.toString
-    else if (x.isPackage)
+    else if(x.isPackage)
       c.abort(c.enclosingPosition, "must in conf.Start ")
     else prefixName(x.owner)
 
@@ -102,8 +102,8 @@ object conf {
 
 import conf._
 
-final class conf extends scala.annotation.StaticAnnotation {
-  inline def apply(defn: Any) = meta {
+class conf extends scala.annotation.StaticAnnotation {
+  inline def apply(defn: Any): Any = meta {
     val out = replace_class(defn, None)
     out
   }
