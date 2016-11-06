@@ -3,23 +3,14 @@ name := "scala-macro-example"
 def info = Seq(
   scalaVersion := "2.11.8",
   organization := "yjs",
-  libraryDependencies ++= Seq(
-    "org.scala-lang" % "scala-library" % scalaVersion.value,
-    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-    "org.scala-lang" % "scala-compiler" % scalaVersion.value,
-    "com.typesafe" % "config" % "1.3.0"
-  )
+  libraryDependencies ++= Seq("com.typesafe" % "config" % "1.3.0"),
+  version := "0.0.1"
 )
 
 def scalaMeta = Seq(
   addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M5" cross CrossVersion.full),
-  libraryDependencies ++= Seq("org.scalameta" %% "scalameta" % "1.2.0").map(excludeScalaLib).map(_.withSources())
+  libraryDependencies ++= Seq("org.scalameta" %% "scalameta" % "1.2.0")
 )
-
-def excludeScalaLib(l: ModuleID) = l
-  .exclude("org.scala-lang", "scala-library")
-  .exclude("org.scala-lang", "scala-reflect")
-  .exclude("org.scala-lang", "scala-compiler")
 
 def options = Seq(
   javacOptions ++= Seq("-encoding", "UTF-8")
@@ -34,8 +25,6 @@ def logDepend = Seq(libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.12")
 def testLib = Seq(libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.4" % Test)
 
 def unPublish = Seq(publishArtifact := false, publish := {})
-
-def measureDepend = Seq(libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.7")
 
 def akkaDepend = Seq(libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-testkit" % "2.4.11" % "test",
