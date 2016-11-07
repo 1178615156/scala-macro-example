@@ -56,5 +56,5 @@ lazy val `macros-test` = (project in file("./macros-test"))
 
 lazy val `scala-macro-example` = (project in file("."))
   .settings(info ++ scalaMeta ++ publishSetting)
-  .dependsOn(`macros-common`, `macros-config`, `macros-play`, `macros-test` % Test)
-  .aggregate(`macros-common`, `macros-config`, `macros-play`, `macros-test`)
+  .dependsOn(`macros-common`, `macros-config`, `macros-play` ,`macros-akka` , `macros-test` % Test)
+  .aggregate(`macros-common`, `macros-config`, `macros-play` ,`macros-akka` , `macros-test`)
