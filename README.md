@@ -2,8 +2,9 @@
 [![Build Status](https://travis-ci.org/1178615156/scala-macro-example.svg?branch=master)](https://travis-ci.org/1178615156/scala-macro-example)
 
 ```scala
+  addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M5" cross CrossVersion.full)
 resolvers += "1178615156" at "http://dl.bintray.com/1178615156/maven"
-libraryDependencies += "yjs" %% "scala-macro-example" % "0.0.1"
+libraryDependencies += "yjs" %% "scala-macro-example" % "0.0.3"
 ```
 
 

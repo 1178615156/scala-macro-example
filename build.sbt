@@ -7,7 +7,7 @@ def info = Seq(
     "com.typesafe" % "config" % "1.3.0",
     "org.scala-lang" % "scala-reflect" % scalaVersion.value
   ),
-  version := "0.0.2"
+  version := "0.0.3"
 )
 
 def scalaMeta = Seq(
