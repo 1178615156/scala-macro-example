@@ -33,7 +33,7 @@ object Api {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def fromActor(actorRef: ActorRef): Api = FromActor[Api](actorRef)
+  def fromActor(actorRef: ActorRef): Api = TypeSafeActor.fromActor[Api](actorRef)
 }
 
 trait StopSystemAfterAll extends BeforeAndAfterAll {

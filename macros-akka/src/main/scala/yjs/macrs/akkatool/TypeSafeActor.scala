@@ -10,19 +10,22 @@ import scala.reflect.macros.blackbox
 /**
   * Created by yujieshui on 2016/11/5.
   */
-object FromActor {
-  def apply[T](actorRef: ActorRef): T = macro FromActorImpl.impl[T]
+object FromActor{
+  @deprecated("use TypeSafeActor","")
+  def apply[T](actorRef: ActorRef): T = macro TypeSafeActor.fromActor[T]
+}
+object TypeSafeActor {
+  def fromActor[T](actorRef: ActorRef): T = macro TypeSafeActor.fromActor[T]
 }
 
-
-class FromActorImpl(override val c: blackbox.Context) extends TypeUtils {
+class TypeSafeActor(override val c: blackbox.Context) extends TypeUtils {
 
   import c.universe._
 
   def getAbstractMethod(tye: Type) =
     tye.members.filter(_.isAbstract).filter(_.isMethod).map(_.asMethod)
 
-  def impl[T: c.WeakTypeTag](actorRef: c.Expr[ActorRef]): c.Expr[T] = {
+  def fromActor[T: c.WeakTypeTag](actorRef: c.Expr[ActorRef]): c.Expr[T] = {
     val t = c.weakTypeOf[T]
     val abstractMethods = getAbstractMethod(t)
 
