@@ -12,7 +12,7 @@ import scala.reflect.macros.blackbox
   */
 object FromActor{
   @deprecated("use TypeSafeActor","")
-  def apply[T](actorRef: ActorRef): T = macro TypeSafeActor.fromActor[T]
+  def apply[T](actorRef: ActorRef): T = macro TypeSafeActorImpl.fromActor[T]
 }
 object TypeSafeActor {
   def fromActor[T](actorRef: ActorRef): T = macro TypeSafeActorImpl.fromActor[T]
