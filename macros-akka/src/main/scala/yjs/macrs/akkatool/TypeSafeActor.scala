@@ -15,10 +15,10 @@ object FromActor{
   def apply[T](actorRef: ActorRef): T = macro TypeSafeActor.fromActor[T]
 }
 object TypeSafeActor {
-  def fromActor[T](actorRef: ActorRef): T = macro TypeSafeActor.fromActor[T]
+  def fromActor[T](actorRef: ActorRef): T = macro TypeSafeActorImpl.fromActor[T]
 }
 
-class TypeSafeActor(override val c: blackbox.Context) extends TypeUtils {
+class TypeSafeActorImpl(override val c: blackbox.Context) extends TypeUtils {
 
   import c.universe._
 
