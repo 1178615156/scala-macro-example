@@ -1,6 +1,12 @@
 # scala-macro-example
 [![Build Status](https://travis-ci.org/1178615156/scala-macro-example.svg?branch=master)](https://travis-ci.org/1178615156/scala-macro-example)
 
+```scala
+resolvers += "1178615156" at "http://dl.bintray.com/1178615156/maven"
+libraryDependencies += "yjs" %% "scala-macro-example" % "0.0.1"
+```
+
+
 #### akkatool
 ```scala
 trait Api {
