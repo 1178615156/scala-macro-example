@@ -5,7 +5,7 @@ def info = Seq(
   organization := "yjs",
   libraryDependencies ++= Seq(
     "com.typesafe" % "config" % "1.3.0",
-    "org.scala-lang" % "scala-reflect" % version.value
+    "org.scala-lang" % "scala-reflect" % scalaVersion.value
   ),
   version := "0.0.2"
 )
