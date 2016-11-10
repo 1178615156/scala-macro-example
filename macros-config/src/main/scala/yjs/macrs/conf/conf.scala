@@ -9,50 +9,9 @@ import scala.language.experimental.macros
   * Created by yuJieShui on 2016/7/13.
   */
 
-class confApplyImpl(val c: scala.reflect.macros.blackbox.Context)
-  extends yjs.macrs.common.ProjectProperty {
-
-  import c.universe._
-
-  private def prefixName(x: Symbol): String =
-    if(x.annotations.exists(e => c.typecheck(e.tree).tpe <:< typeOf[conf.Start]))
-      x.fullName.toString
-    else if(x.isPackage)
-      c.abort(c.enclosingPosition, "must in conf.Start ")
-    else prefixName(x.owner)
-
-  def impl[T](config: c.Expr[Config])(implicit t: c.WeakTypeTag[T]): c.Tree = {
-
-    val configName = ownerName.replace(prefixName(c.internal.enclosingOwner), "").tail
-
-    def asScala(tree: Tree): Tree =
-      q"scala.collection.JavaConversions.asScalaBuffer($tree).toList"
-
-    val out = c.weakTypeOf[T] match {
-      case x if x <:< typeOf[Int]     => q"$config.getInt($configName)"
-      case x if x <:< typeOf[Boolean] => q"$config.getBoolean($configName)"
-      case x if x <:< typeOf[Double]  => q"$config.getDouble($configName)"
-      case x if x <:< typeOf[String]  => q"$config.getString($configName)"
-      case x if x <:< typeOf[Config]  => q"$config.getConfig($configName)"
-      case x if x <:< typeOf[Long]    => q"$config.getLong($configName)"
-
-      case x if x <:< typeOf[List[Int]]     => q"${asScala(q"$config.getIntList($configName)")}.map(_.toInt)"
-      case x if x <:< typeOf[List[Boolean]] => q"${asScala(q"$config.getBooleanList($configName)")}.map(_.toBoolean)"
-      case x if x <:< typeOf[List[Double]]  => q"${asScala(q"$config.getDoubleList($configName)")}.map(_.toDouble)"
-      case x if x <:< typeOf[List[String]]  => q"${asScala(q"$config.getStringList($configName)")}"
-      case x if x <:< typeOf[List[Config]]  => q"${asScala(q"$config.getConfigList($configName)")}"
-      case x if x <:< typeOf[List[Long]]    => q"${asScala(q"$config.getLongList($configName)")}.map(_.toLong)"
-    }
-    c.echo(c.internal.enclosingOwner.pos, "\n" + show(configName))
-    out
-  }
-}
 
 object conf {
 
-  class Start extends scala.annotation.StaticAnnotation
-
-  def apply[T](implicit config: Config): T = macro confApplyImpl.impl[T]
 
   import scala.meta.Defn._
   import scala.meta._
@@ -108,3 +67,44 @@ class conf extends scala.annotation.StaticAnnotation {
     out
   }
 }
+
+
+
+//class confApplyImpl(val c: scala.reflect.macros.blackbox.Context)
+//  extends yjs.macrs.common.ProjectProperty {
+//
+//  import c.universe._
+//
+//  private def prefixName(x: Symbol): String =
+//    if(x.annotations.exists(e => c.typecheck(e.tree).tpe <:< typeOf[conf.Start]))
+//      x.fullName.toString
+//    else if(x.isPackage)
+//      c.abort(c.enclosingPosition, "must in conf.Start ")
+//    else prefixName(x.owner)
+//
+//  def impl[T](config: c.Expr[Config])(implicit t: c.WeakTypeTag[T]): c.Tree = {
+//
+//    val configName = ownerName.replace(prefixName(c.internal.enclosingOwner), "").tail
+//
+//    def asScala(tree: Tree): Tree =
+//      q"scala.collection.JavaConversions.asScalaBuffer($tree).toList"
+//
+//    val out = c.weakTypeOf[T] match {
+//      case x if x <:< typeOf[Int]     => q"$config.getInt($configName)"
+//      case x if x <:< typeOf[Boolean] => q"$config.getBoolean($configName)"
+//      case x if x <:< typeOf[Double]  => q"$config.getDouble($configName)"
+//      case x if x <:< typeOf[String]  => q"$config.getString($configName)"
+//      case x if x <:< typeOf[Config]  => q"$config.getConfig($configName)"
+//      case x if x <:< typeOf[Long]    => q"$config.getLong($configName)"
+//
+//      case x if x <:< typeOf[List[Int]]     => q"${asScala(q"$config.getIntList($configName)")}.map(_.toInt)"
+//      case x if x <:< typeOf[List[Boolean]] => q"${asScala(q"$config.getBooleanList($configName)")}.map(_.toBoolean)"
+//      case x if x <:< typeOf[List[Double]]  => q"${asScala(q"$config.getDoubleList($configName)")}.map(_.toDouble)"
+//      case x if x <:< typeOf[List[String]]  => q"${asScala(q"$config.getStringList($configName)")}"
+//      case x if x <:< typeOf[List[Config]]  => q"${asScala(q"$config.getConfigList($configName)")}"
+//      case x if x <:< typeOf[List[Long]]    => q"${asScala(q"$config.getLongList($configName)")}.map(_.toLong)"
+//    }
+//    c.echo(c.internal.enclosingOwner.pos, "\n" + show(configName))
+//    out
+//  }
+//}
