@@ -4,7 +4,7 @@
 ```scala
   addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M5" cross CrossVersion.full)
 resolvers += "1178615156" at "http://dl.bintray.com/1178615156/maven"
-libraryDependencies += "yjs" %% "scala-macro-example" % "0.0.3"
+libraryDependencies += "yjs" %% "scala-macro-example" % "0.0.4"
 ```
 
 
