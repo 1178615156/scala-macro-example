@@ -1,11 +1,17 @@
 package yjs.macrs.slick
 
-/**
-  * Created by yujieshui on 2017/5/12.
-  */
-case class Entity(id: Int, name: String, helloWorld: Option[String])
+import slick.lifted.ProvenShape
+import slick.jdbc.MySQLProfile.api._
+
 
 class GetResultBuildTest {
   GetResultBuild.literal[Entity]
 
+}
+
+object SortByNameTest {
+  val sortFieldName = "id"
+  val table = TableQuery[EntityTable]
+
+  SortByName.apply(table, sortFieldName, true)
 }

@@ -1,45 +1,11 @@
-# scala-macro-example
+# macros-utils
 [![Build Status](https://travis-ci.org/1178615156/scala-macro-example.svg?branch=master)](https://travis-ci.org/1178615156/scala-macro-example)
 
 ```scala
-  addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M5" cross CrossVersion.full)
-resolvers += "1178615156" at "http://dl.bintray.com/1178615156/maven"
-libraryDependencies += "yjs" %% "scala-macro-example" % "0.0.4"
+addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M5" cross CrossVersion.full)
 ```
 
 
-#### akkatool
-```scala
-trait Api {
-  def ask(i: Int): Future[String]
-
-  def ask(hello: Hello): Future[HelloResult]
-
-  def send(s: String): Unit
-
-  def hello = ask(Hello())
-}
-
-object Api {
-
-  case class Hello()
-
-  case class HelloResult()
-
-  implicit val timeout = Timeout(1.second)
-
-
-  def fromActor(actorRef: ActorRef): Api = FromActor[Api](actorRef)
-  //as 
-  def fromActor(actorRef: ActorRef): Api = new Api{
-    def ask(i: Int): Future[String] = actorRef.ask(i).mapTo[String]
-    def ask(hello: Hello): Future[HelloResult]=actorRef.ask(hello).mapTo[HelloResult]
-    def send(s: String): Unit=actorRef ! s
-  }
-
-}
-
-```
 
 
 

@@ -75,7 +75,8 @@ class SortByNameImpl(val c: blackbox.Context) {
             }):slick.lifted.Ordered})
         }
         """
-    //     showInfo(show(rt))
+
+    c.echo(c.enclosingPosition,show(rt))
 
     c.Expr[PartialFunction[String, slick.lifted.Ordered]](rt)
   }
