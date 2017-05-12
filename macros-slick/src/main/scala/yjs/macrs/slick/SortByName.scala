@@ -46,7 +46,7 @@ class SortByNameImpl(val c: blackbox.Context) {
 
     val nameCaseAsc = etMembers.map {
       case (name, typ) =>
-        val caseName = TermName(c.freshName("slick_sort_by_name"))
+        val caseName = TermName(c.freshName("slickSortName"))
         cq"""
               $caseName:String if ($caseName==($prefix+$name)) =>{
                 $entityTable.${name: TermName}.asc
@@ -55,7 +55,7 @@ class SortByNameImpl(val c: blackbox.Context) {
     }
     val nameCaseDesc = etMembers.map {
       case (name, typ) =>
-        val caseName = TermName(c.freshName("slick_sort_by_name"))
+        val caseName = TermName(c.freshName("slickSortName"))
         cq"""
               $caseName:String if ($caseName==($prefix+$name)) =>{
                 $entityTable.${name: TermName}.desc
@@ -76,7 +76,7 @@ class SortByNameImpl(val c: blackbox.Context) {
         }
         """
 
-    c.echo(c.enclosingPosition,show(rt))
+    c.echo(c.enclosingPosition, show(rt))
 
     c.Expr[PartialFunction[String, slick.lifted.Ordered]](rt)
   }

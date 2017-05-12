@@ -9,9 +9,9 @@ import slick.jdbc.MySQLProfile.api._
 import slick.lifted.ProvenShape
 
 case class EntityTable(tag: Tag) extends Table[Entity](tag, "entity") {
-  val id           = column[Int]("id", O.PrimaryKey)
-  val name         = column[String]("name")
-  val passwordHash = column[Option[String]]("helloWorld")
+  val id          : Rep[Int]            = column[Int]("id", O.PrimaryKey)
+  val name        : Rep[String]         = column[String]("name")
+  val passwordHash: Rep[Option[String]] = column[Option[String]]("helloWorld")
 
   override def * : ProvenShape[Entity] = (id, name, passwordHash) <> (Entity.tupled, Entity.unapply)
 }
