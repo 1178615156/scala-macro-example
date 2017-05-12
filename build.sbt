@@ -1,4 +1,4 @@
-name := "scala-macro-example"
+name := "macros-utils"
 
 def info = Seq(
   scalaVersion := "2.11.8",
@@ -25,18 +25,13 @@ def options = Seq(
 
 def logDepend = Seq(libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.12")
 
-def testLib = Seq(libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.4" % Test)
+def testLib = Seq(libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % Test)
 
-def publishSetting = Seq(
-  licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
-)
+def publishSetting = Seq()
+
+def slickDepend = Seq(libraryDependencies += "com.typesafe.slick" %% "slick" % "3.2.0")
 
 def unPublish = Seq(publishArtifact := false, publish := {})
-
-def akkaDepend = Seq(libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-testkit" % "2.4.11" % "test",
-  "com.typesafe.akka" %% "akka-actor" % "2.4.11"
-))
 
 lazy val `macros-common` = (project in file("./macros-common"))
   .settings(info ++ scalaMeta ++ testLib ++ publishSetting)
@@ -47,14 +42,14 @@ lazy val `macros-config` = (project in file("./macros-config"))
 lazy val `macros-play` = (project in file("./macros-play"))
   .settings(info ++ scalaMeta ++ testLib ++ publishSetting).dependsOn(`macros-common`)
 
-lazy val `macros-akka` = (project in file("./macros-akka"))
-  .settings(info ++ scalaMeta ++ testLib ++ publishSetting ++ akkaDepend).dependsOn(`macros-common`)
+lazy val `macros-slick` = (project in file("./macros-slick"))
+  .settings(info ++ testLib ++ publishSetting ++ slickDepend).dependsOn(`macros-common`)
 
 lazy val `macros-test` = (project in file("./macros-test"))
-  .settings(info ++ unPublish ++ scalaMeta ++ testLib ++ akkaDepend)
-  .dependsOn(`macros-common`, `macros-config`, `macros-akka`, `macros-play`)
+  .settings(info ++ unPublish ++ scalaMeta ++ testLib)
+  .dependsOn(`macros-common`, `macros-config`, `macros-play`, `macros-slick`)
 
 lazy val `scala-macro-example` = (project in file("."))
   .settings(info ++ scalaMeta ++ publishSetting)
-  .dependsOn(`macros-common`, `macros-config`, `macros-play` ,`macros-akka` , `macros-test` % Test)
-  .aggregate(`macros-common`, `macros-config`, `macros-play` ,`macros-akka` , `macros-test`)
+  .dependsOn(`macros-common`, `macros-config`, `macros-play`, `macros-slick`, `macros-test` % Test)
+  .aggregate(`macros-common`, `macros-config`, `macros-play`, `macros-slick`, `macros-test`)
