@@ -59,9 +59,12 @@ class TimeLogImpl(val c: blackbox.Context) {
              implicitly[org.slf4j.Logger].info($logString)
              $resultName
            """
-//        println(show(newBody))
+        //        println(show(newBody))
         val newDef = DefDef(x.mods, x.name, x.tparams, x.vparamss, x.tpt, newBody)
         newDef
+      case x         =>
+//        c.warning(c.enclosingPosition,"...")
+        x
     }
 
 
