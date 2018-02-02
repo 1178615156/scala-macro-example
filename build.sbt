@@ -1,18 +1,9 @@
 name := "macros-utils"
 
-def info = Seq(
-  scalaVersion := "2.11.8",
-  organization := "yjs",
-  libraryDependencies ++= Seq(
-    "com.typesafe" % "config" % "1.3.0",
-    "org.scala-lang" % "scala-reflect" % scalaVersion.value
-  ),
-  version := "0.0.4"
-)
-
-def scalaMeta = Seq(
-  addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M5" cross CrossVersion.full),
-  libraryDependencies ++= Seq("org.scalameta" %% "scalameta" % "1.2.0")
+def macroAnnotationSettings = Seq(
+  addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M10" cross CrossVersion.full),
+  scalacOptions += "-Xplugin-require:macroparadise",
+  scalacOptions in(Compile, console) ~= (_ filterNot (_ contains "paradise")) // macroparadise plugin doesn't work in repl yet.
 )
 
 def options = Seq(
@@ -23,9 +14,13 @@ def options = Seq(
   , scalacOptions ++= Seq("-deprecation")
 )
 
-def logDepend = Seq(libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.12")
-
-def testLib = Seq(libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % Test)
+def commonSetting = macroAnnotationSettings ++ options ++ Seq(
+  scalaVersion := "2.12.4",
+  organization := "yjs",
+  version := "0.0.4",
+  libraryDependencies ++= Libs.config ++ Libs.test ++ Libs.slf4j.slf4j,
+  libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value
+)
 
 def publishSetting = Seq()
 
@@ -34,22 +29,27 @@ def slickDepend = Seq(libraryDependencies += "com.typesafe.slick" %% "slick" % "
 def unPublish = Seq(publishArtifact := false, publish := {})
 
 lazy val `macros-common` = (project in file("./macros-common"))
-  .settings(info ++ scalaMeta ++ testLib ++ publishSetting)
+  .settings(commonSetting)
 
-lazy val `macros-config` = (project in file("./macros-config"))
-  .settings(info ++ scalaMeta ++ testLib ++ publishSetting).dependsOn(`macros-common`)
+lazy val `macros-utensil` = (project in file("./macros-utensil"))
+  .settings(commonSetting)
+  .dependsOn(`macros-common`)
 
 lazy val `macros-play` = (project in file("./macros-play"))
-  .settings(info ++ scalaMeta ++ testLib ++ publishSetting).dependsOn(`macros-common`)
+  .settings(commonSetting)
+  .dependsOn(`macros-common`)
 
 lazy val `macros-slick` = (project in file("./macros-slick"))
-  .settings(info ++ testLib ++ publishSetting ++ slickDepend).dependsOn(`macros-common`)
+  .settings(commonSetting)
+  .settings(Seq(libraryDependencies ++= Libs.slick))
+  .dependsOn(`macros-common`)
 
 lazy val `macros-test` = (project in file("./macros-test"))
-  .settings(info ++ unPublish ++ scalaMeta ++ testLib)
-  .dependsOn(`macros-common`, `macros-config`, `macros-play`, `macros-slick`)
+  .settings(commonSetting)
+  .settings(Seq(libraryDependencies ++= Libs.logback))
+  .dependsOn(`macros-common`, `macros-utensil`, `macros-play`, `macros-slick`)
 
 lazy val `scala-macro-example` = (project in file("."))
-  .settings(info ++ scalaMeta ++ publishSetting)
-  .dependsOn(`macros-common`, `macros-config`, `macros-play`, `macros-slick`, `macros-test` % Test)
-  .aggregate(`macros-common`, `macros-config`, `macros-play`, `macros-slick`, `macros-test`)
+  .settings(commonSetting)
+  .dependsOn(`macros-common`, `macros-utensil`, `macros-play`, `macros-slick`, `macros-test` % Test)
+  .aggregate(`macros-common`, `macros-utensil`, `macros-play`, `macros-slick`, `macros-test`)

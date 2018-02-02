@@ -128,18 +128,18 @@ object MakeRoute {
   //
   //    defn
   //  }
-  import scala.meta._
-
-  def controllerRouteLines(stats: Seq[Stat]) = {
-    stats.collect {
-      case x: Defn.Def => x.mods.collect { case Mod.Annot(annot) => annot }
-    }
-  }
-
-  def impl(defn: Any) = defn match {
-    case x: Defn.Trait  => controllerRouteLines(x.templ.stats.getOrElse(Nil))
-    case x: Defn.Class  => controllerRouteLines(x.templ.stats.getOrElse(Nil))
-    case x: Defn.Object => controllerRouteLines(x.templ.stats.getOrElse(Nil))
-  }
+//  import scala.meta._
+//
+//  def controllerRouteLines(stats: Seq[Stat]) = {
+//    stats.collect {
+//      case x: Defn.Def => x.mods.collect { case Mod.Annot(annot) => annot }
+//    }
+//  }
+//
+//  def impl(defn: Any) = defn match {
+//    case x: Defn.Trait  => controllerRouteLines(x.templ.stats.getOrElse(Nil))
+//    case x: Defn.Class  => controllerRouteLines(x.templ.stats.getOrElse(Nil))
+//    case x: Defn.Object => controllerRouteLines(x.templ.stats.getOrElse(Nil))
+//  }
 
 }
