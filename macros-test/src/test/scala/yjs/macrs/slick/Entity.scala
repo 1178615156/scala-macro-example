@@ -1,12 +1,12 @@
 package yjs.macrs.slick
+import slick.jdbc.MySQLProfile.api._
+import slick.lifted.ProvenShape
 
 /**
   * Created by yujieshui on 2017/5/12.
   */
 case class Entity(id: Int, name: String, helloWorld: Option[String])
 
-import slick.jdbc.MySQLProfile.api._
-import slick.lifted.ProvenShape
 
 case class EntityTable(tag: Tag) extends Table[Entity](tag, "entity") {
   val id          : Rep[Int]            = column[Int]("id", O.PrimaryKey)

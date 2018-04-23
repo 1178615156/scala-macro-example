@@ -5,30 +5,41 @@
 addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M5" cross CrossVersion.full)
 ```
 
+#### slick
 
-
-
-
-#### conf parsing config path in complete 
 ```scala
-import yjs.macrs.conf.conf
-import com.typesafe.config.Config
+case class Entity(id: Int, name: String, helloWorld: Option[String])
 
-object global_conf {
-  implicit val config: Config = ConfigFactory.load()
-  @conf
-  object hello {
-    val ss    = conf.as[String]//config.getString("hello.ss")
-    val ll    = conf.as[List[Int]] //config.getIntList("hello.ll")
-    trait world{
-      val list = conf.as[List[Config]] //config.getConfigList("hello.world.list")
-    }
-  }
-  
 
+case class EntityTable(tag: Tag) extends Table[Entity](tag, "entity") {
+  val id          : Rep[Int]            = column[Int]("id", O.PrimaryKey)
+  val name        : Rep[String]         = column[String]("name")
+  val passwordHash: Rep[Option[String]] = column[Option[String]]("helloWorld")
+
+  override def * : ProvenShape[Entity] = (id, name, passwordHash) <> (Entity.tupled, Entity.unapply)
 }
 ```
 
+SortByName
+```scala
+  val sortFieldName                  = "id"
+  val table: TableQuery[EntityTable] = TableQuery[EntityTable]
+
+  table.sortBy(table => SortByName.apply(table, sortFieldName, true))
+  //等价于
+  table.sortBy(table => sortFieldName match {
+    case "id"           => if(true) table.id.asc else table.id.desc
+    case "name"         => if(true) table.name.asc else table.name.desc
+    case "passwordHash" => if(true) table.passwordHash.asc else table.passwordHash.desc
+  })
+```
+
+GetResult
+```scala
+GetResultBuild.literal[Entity]
+//等价于
+slick.jdbc.GetResult[Entity]((x :slick.jdbc.PositionedResult ) => new Entity(...))
+```
 #### make play routes
 
 it will auto make conf/routes file 
